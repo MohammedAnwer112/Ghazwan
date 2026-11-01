@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تجربة شحن وتفريغ المتسعة - المنهج المدرسي</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        canvas {
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6 bg-slate-50 text-slate-900">
+
+    <!-- Simple Header -->
+    <header class="max-w-4xl mx-auto w-full bg-white border border-slate-200 rounded-xl p-4 shadow-sm mb-4 flex flex-wrap justify-between items-center gap-3">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-car-battery text-blue-600"></i> نشاط شحن وتفريغ المتسعة
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500">الفيزياء - الصف السادس العلمي (الفصل الأول)</p>
+        </div>
+        
+        <!-- Supervisor Name -->
+        <div class="bg-amber-50 border border-amber-300 px-4 py-2 rounded-lg text-amber-900 font-bold text-sm flex items-center gap-2">
+            <i class="fa-solid fa-user-graduate text-amber-600"></i>
+            <span>إشراف الأستاذ:</span>
+            <span class="text-blue-700 font-extrabold text-base">غزوان محمد</span>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <main class="max-w-4xl mx-auto w-full flex flex-col gap-4">
+        
+        <!-- Interactive Circuit Canvas Area -->
+        <div class="bg-white border border-slate-300 rounded-xl p-4 shadow-sm flex flex-col items-center relative">
+            
+            <div class="w-full flex justify-between items-center mb-2 px-2 text-xs sm:text-sm text-slate-600 border-b pb-2 border-slate-100">
+                <span class="font-semibold text-slate-700">
+                    <i class="fa-solid fa-hand-pointer text-blue-500 animate-bounce"></i> يمكنك اضغاط المفتاح K مباشرة في الرسم لتشغيله
+                </span>
+                <span id="switchStatusBadge" class="px-3 py-1 rounded-full font-bold bg-slate-100 text-slate-600">
+                    المفتاح متوقف (K = 0)
+                </span>
+            </div>
+
+            <!-- Canvas -->
+            <canvas id="circuitCanvas" class="w-full h-[340px] border border-slate-100 rounded-lg cursor-pointer bg-white"></canvas>
+
+            <!-- Quick Direct Action Buttons -->
+            <div class="w-full grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-100">
+                <button onclick="setSwitchPos(1)" id="btn1" class="py-2.5 px-3 rounded-lg font-bold text-sm border-2 border-blue-600 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-1"></i> موقع (1) - شحن
+                </button>
+                <button onclick="setSwitchPos(0)" id="btn0" class="py-2.5 px-3 rounded-lg font-bold text-sm border-2 border-slate-400 bg-slate-100 text-slate-700 hover:bg-slate-700 hover:text-white transition-all flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-power-off"></i> موقع (0) - قطع
+                </button>
+                <button onclick="setSwitchPos(2)" id="btn2" class="py-2.5 px-3 rounded-lg font-bold text-sm border-2 border-amber-600 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition-all flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-2"></i> موقع (2) - تفريغ
+                </button>
+            </div>
+        </div>
+
+        <!-- Explanation Card -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-sm leading-relaxed space-y-3">
+            <h3 class="font-bold text-base text-slate-800 border-b pb-2 border-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-book-open text-blue-600"></i> ملخص ملاحظات النشاط (وزاري):
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-sm">
+                <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100">
+                    <span class="font-bold text-blue-800 block mb-1">عند غلق المفتاح K في موقع (1):</span>
+                    ينحرف مؤشر الجلفانوميتر $G$ لحظياً باتجاه اليمين ويتوهج المصباح $L_1$ بضوء ساطع ثم ينطفئان بسرعة؛ لأن المتسعة تشحن بكامل طاقتها فيصبح فرق جهدها مساوياً لفرق جهد البطارية ($V_C = V_B$).
+                </div>
+
+                <div class="bg-amber-50/60 p-3 rounded-lg border border-amber-100">
+                    <span class="font-bold text-amber-800 block mb-1">عند ربط المفتاح K في موقع (2):</span>
+                    ينحرف مؤشر الجلفانوميتر $G$ بالاتجاه المعاكس (لليسار) ويتوهج المصباح $L_2$ برهة من الزمن ثم ينطفئان؛ بسبب تفريغ شحنة المتسعة تماماً عبر سلك التوصيل.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-4xl mx-auto w-full text-center text-xs text-slate-500 py-4 mt-2">
+        محاكاة مبسطة لدائرة شحن وتفريغ المتسعة | إشراف الأستاذ <strong>غزوان محمد</strong>
+    </footer>
+
+    <!-- Circuit Logic and Canvas Animation -->
+    <script>
+        let switchPos = 0; // 0 = off, 1 = charge, 2 = discharge
+        let chargeRatio = 0.0; // 0.0 to 1.0
+        let targetCharge = 0.0;
+        let needleAngle = 0; // Galvanometer needle
+        let electronOffset = 0;
+        let currentIntensity = 0; // calculated dynamically
+
+        // Canvas Setup
+        const canvas = document.getElementById('circuitCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Switch Hitbox for Canvas Click
+        let switchHitbox = { x: 0, y: 0, r: 35 };
+
+        window.onload = function() {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Allow Clicking directly on Canvas to toggle switch!
+            canvas.addEventListener('click', handleCanvasClick);
+            
+            // Start Loop
+            requestAnimationFrame(animate);
+        };
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width - 32;
+            canvas.height = 340;
+        }
+
+        function setSwitchPos(pos) {
+            switchPos = pos;
+            if (pos === 1) {
+                targetCharge = 1.0;
+            } else if (pos === 2) {
+                targetCharge = 0.0;
+            }
+
+            // Update UI status
+            const badge = document.getElementById('switchStatusBadge');
+            if (pos === 1) {
+                badge.innerText = 'عملية الشحن (K = 1)';
+                badge.className = 'px-3 py-1 rounded-full font-bold bg-blue-100 text-blue-700 border border-blue-300';
+            } else if (pos === 2) {
+                badge.innerText = 'عملية التفريغ (K = 2)';
+                badge.className = 'px-3 py-1 rounded-full font-bold bg-amber-100 text-amber-700 border border-amber-300';
+            } else {
+                badge.innerText = 'المفتاح متوقف (K = 0)';
+                badge.className = 'px-3 py-1 rounded-full font-bold bg-slate-100 text-slate-600';
+            }
+        }
+
+        function handleCanvasClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            // Check if user clicked near switch area
+            const dist = Math.hypot(mouseX - switchHitbox.x, mouseY - switchHitbox.y);
+            if (dist <= switchHitbox.r + 15) {
+                // Cycle switch: 0 -> 1 -> 2 -> 0
+                if (switchPos === 0) setSwitchPos(1);
+                else if (switchPos === 1) setSwitchPos(2);
+                else setSwitchPos(0);
+            }
+        }
+
+        // --- Physics Engine & Rendering ---
+        function animate() {
+            // Smooth charge transition
+            let prevCharge = chargeRatio;
+            let speed = 0.04;
+            
+            if (switchPos === 1) {
+                chargeRatio += (1.0 - chargeRatio) * speed;
+            } else if (switchPos === 2) {
+                chargeRatio += (0.0 - chargeRatio) * speed;
+            }
+
+            // Calculate instantaneous current (dQ/dt)
+            currentIntensity = (chargeRatio - prevCharge) * 25;
+
+            // Galvanometer needle target deflection
+            let targetNeedle = currentIntensity * 22; // Right for (+), Left for (-)
+            needleAngle += (targetNeedle - needleAngle) * 0.2;
+
+            // Update electrons position
+            electronOffset += currentIntensity * 2;
+
+            // Draw everything clean & basic
+            drawBasicCircuit();
+
+            requestAnimationFrame(animate);
+        }
+
+        function drawBasicCircuit() {
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            // Coordinates
+            const marginX = Math.max(50, w * 0.12);
+            const marginY = 40;
+            const leftX = marginX;
+            const rightX = w - marginX;
+            const topY = marginY;
+            const midY = h / 2;
+            const botY = h - marginY;
+            const capX = w * 0.5;
+
+            switchHitbox.x = rightX - 20;
+            switchHitbox.y = midY;
+
+            // 1. Draw Wires (Thick High-Contrast Black/Dark Lines)
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Top Line
+            ctx.beginPath();
+            ctx.moveTo(leftX, topY);
+            ctx.lineTo(rightX, topY);
+            ctx.stroke();
+
+            // Middle Line
+            ctx.beginPath();
+            ctx.moveTo(leftX, midY);
+            ctx.lineTo(rightX - 35, midY);
+            ctx.stroke();
+
+            // Bottom Line
+            ctx.beginPath();
+            ctx.moveTo(leftX, botY);
+            ctx.lineTo(rightX, botY);
+            ctx.stroke();
+
+            // Vertical Left Wire
+            ctx.beginPath();
+            ctx.moveTo(leftX, topY);
+            ctx.lineTo(leftX, botY);
+            ctx.stroke();
+
+            // Vertical Right Lines to Switch terminals
+            ctx.beginPath();
+            ctx.moveTo(rightX, topY);
+            ctx.lineTo(rightX, midY - 20); // Terminal 2
+            ctx.moveTo(rightX, botY);
+            ctx.lineTo(rightX, midY + 20); // Terminal 1
+            ctx.stroke();
+
+            // 2. Draw Current Flow (Blue Moving Dots)
+            if (Math.abs(currentIntensity) > 0.001) {
+                ctx.fillStyle = '#2563eb';
+                const step = 20;
+                
+                if (switchPos === 1) { // Bottom Loop
+                    // Draw moving dots in lower loop
+                    for (let x = leftX; x <= rightX; x += step) {
+                        let offset = (x + electronOffset) % step;
+                        ctx.beginPath();
+                        ctx.arc(leftX + (x - leftX + offset) % (rightX - leftX), botY, 3, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.arc(leftX + (x - leftX - offset + (rightX - leftX)) % (rightX - leftX), midY, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else if (switchPos === 2) { // Top Loop
+                    for (let x = leftX; x <= rightX; x += step) {
+                        let offset = (x + electronOffset) % step;
+                        ctx.beginPath();
+                        ctx.arc(leftX + (x - leftX + offset) % (rightX - leftX), topY, 3, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.arc(leftX + (x - leftX - offset + (rightX - leftX)) % (rightX - leftX), midY, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+
+            // 3. Components Drawing (Clean textbook style)
+
+            // --- Capacitor C ---
+            const capH = 40;
+            const capGap = 16;
+            ctx.clearRect(capX - capGap - 6, midY - capH/2 - 2, capGap * 2 + 12, capH + 4);
+
+            // Plate A
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(capX - capGap/2 - 5, midY - capH/2, 5, capH);
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 13px Cairo';
+            ctx.fillText('A', capX - capGap/2 - 14, midY - capH/2 - 5);
+
+            // Plate B
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(capX + capGap/2, midY - capH/2, 5, capH);
+            ctx.fillText('B', capX + capGap/2 + 5, midY - capH/2 - 5);
+
+            ctx.fillText('المتسعة C', capX - 24, midY + capH/2 + 18);
+
+            // Charges on Plates
+            if (chargeRatio > 0.05) {
+                const count = Math.min(5, Math.floor(chargeRatio * 5) + 1);
+                ctx.font = 'bold 11px monospace';
+
+                // Plate A (+)
+                ctx.fillStyle = '#dc2626';
+                for (let i = 0; i < count; i++) {
+                    ctx.fillText('+', capX - capGap/2 - 16, midY - capH/2 + 8 + i * 8);
+                }
+
+                // Plate B (-)
+                ctx.fillStyle = '#2563eb';
+                for (let i = 0; i < count; i++) {
+                    ctx.fillText('-', capX + capGap/2 + 14, midY - capH/2 + 8 + i * 8);
+                }
+            }
+
+
+            // --- Galvanometer G ---
+            const galvX = leftX + (capX - leftX) * 0.45;
+            const gRadius = 20;
+
+            ctx.clearRect(galvX - gRadius, midY - gRadius, gRadius * 2, gRadius * 2);
+            ctx.beginPath();
+            ctx.arc(galvX, midY, gRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Center Text G
+            ctx.fillStyle = '#64748b';
+            ctx.font = 'bold 11px Cairo';
+            ctx.fillText('G', galvX - 4, midY + 14);
+
+            // Zero Tick Line
+            ctx.beginPath();
+            ctx.moveTo(galvX, midY - gRadius);
+            ctx.lineTo(galvX, midY - gRadius + 5);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.stroke();
+
+            // Needle
+            ctx.save();
+            ctx.translate(galvX, midY + 2);
+            ctx.rotate(needleAngle * Math.PI / 180);
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -gRadius + 4);
+            ctx.stroke();
+            ctx.restore();
+
+
+            // --- Bulbs L1 & L2 ---
+            // L1 (Bottom-Left)
+            drawSimpleBulb(leftX, (midY + botY) / 2, 'L₁', switchPos === 1 ? Math.abs(currentIntensity) : 0);
+            
+            // L2 (Top-Left)
+            drawSimpleBulb(leftX, (midY + topY) / 2, 'L₂', switchPos === 2 ? Math.abs(currentIntensity) : 0);
+
+
+            // --- Battery (Bottom) ---
+            ctx.clearRect(capX - 20, botY - 14, 40, 28);
+            // Long Line (+)
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(capX - 6, botY - 14);
+            ctx.lineTo(capX - 6, botY + 14);
+            ctx.stroke();
+            // Short Line (-)
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(capX + 6, botY - 8);
+            ctx.lineTo(capX + 6, botY + 8);
+            ctx.stroke();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.font = '12px Cairo';
+            ctx.fillText('بطارية', capX - 15, botY + 26);
+
+
+            // --- Resistor R (Bottom Left) ---
+            const resX = leftX + (capX - leftX) * 0.45;
+            const resW = 32;
+            const resH = 12;
+            ctx.clearRect(resX - resW/2, botY - resH/2 - 2, resW, resH + 4);
+            ctx.strokeStyle = '#059669';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(resX - resW/2, botY - resH/2, resW, resH);
+            ctx.fillStyle = '#0f172a';
+            ctx.font = '12px Cairo';
+            ctx.fillText('مقاومة R', resX - 18, botY + 24);
+
+
+            // --- Switch K (Double Throw) ---
+            const swX = rightX - 35;
+
+            // Terminals
+            ctx.fillStyle = '#0f172a';
+            // Terminal 1 (Bottom)
+            ctx.beginPath(); ctx.arc(rightX, midY + 20, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.fillText('1', rightX + 8, midY + 24);
+
+            // Terminal 2 (Top)
+            ctx.beginPath(); ctx.arc(rightX, midY - 20, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.fillText('2', rightX + 8, midY - 16);
+
+            // Pivot Center Point
+            ctx.fillStyle = '#d97706';
+            ctx.beginPath(); ctx.arc(swX, midY, 5, 0, Math.PI * 2); ctx.fill();
+
+            // Switch Blade Line
+            ctx.strokeStyle = '#d97706';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(swX, midY);
+
+            if (switchPos === 1) {
+                ctx.lineTo(rightX, midY + 20); // Connect to 1
+            } else if (switchPos === 2) {
+                ctx.lineTo(rightX, midY - 20); // Connect to 2
+            } else {
+                ctx.lineTo(swX + 15, midY - 8); // Disconnected
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#d97706';
+            ctx.font = 'bold 13px Cairo';
+            ctx.fillText('المفتاح K', swX - 15, midY - 22);
+
+            // Click Hint Halo around switch
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.arc(swX + 15, midY, 28, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset
+        }
+
+        function drawSimpleBulb(x, y, label, current) {
+            const r = 14;
+            ctx.clearRect(x - r - 2, y - r - 2, r * 2 + 4, r * 2 + 4);
+
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            
+            // Yellow fill when lighted up
+            if (current > 0.02) {
+                ctx.fillStyle = `rgba(234, 179, 8, ${Math.min(1, current * 2)})`;
+            } else {
+                ctx.fillStyle = '#ffffff';
+            }
+            ctx.fill();
+
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Filament 'X'
+            ctx.beginPath();
+            ctx.moveTo(x - 4, y - 4); ctx.lineTo(x + 4, y + 4);
+            ctx.moveTo(x + 4, y - 4); ctx.lineTo(x - 4, y + 4);
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 12px Cairo';
+            ctx.fillText('المصباح ' + label, x - 54, y + 4);
+        }
+    </script>
+</body>
+</html>
