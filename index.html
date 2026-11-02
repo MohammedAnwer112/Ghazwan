@@ -1,488 +1,397 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تجربة شحن وتفريغ المتسعة - المنهج المدرسي</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Cairo -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f8fafc;
-            color: #0f172a;
-        }
-        canvas {
-            touch-action: manipulation;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6 bg-slate-50 text-slate-900">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>أنشطة وتجارب فيزياء السادس العلمي | إشراف الأستاذ غزوان محمد</title>
+  <style>
+    :root {
+      --bg-color: #fcfcfc;
+      --card-bg: #ffffff;
+      --text-color: #222222;
+      --text-muted: #555555;
+      --border-color: #dddddd;
+      --accent-color: #1a73e8;
+      --accent-light: #e8f0fe;
+      --tag-bg: #eeeeee;
+    }
 
-    <!-- Simple Header -->
-    <header class="max-w-4xl mx-auto w-full bg-white border border-slate-200 rounded-xl p-4 shadow-sm mb-4 flex flex-wrap justify-between items-center gap-3">
-        <div>
-            <h1 class="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
-                <i class="fa-solid fa-car-battery text-blue-600"></i> نشاط شحن وتفريغ المتسعة
-            </h1>
-            <p class="text-xs sm:text-sm text-slate-500">الفيزياء - الصف السادس العلمي (الفصل الأول)</p>
-        </div>
-        
-        <!-- Supervisor Name -->
-        <div class="bg-amber-50 border border-amber-300 px-4 py-2 rounded-lg text-amber-900 font-bold text-sm flex items-center gap-2">
-            <i class="fa-solid fa-user-graduate text-amber-600"></i>
-            <span>إشراف الأستاذ:</span>
-            <span class="text-blue-700 font-extrabold text-base">غزوان محمد</span>
-        </div>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 25px 15px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: var(--text-color);
+      margin-bottom: 8px;
+    }
+
+    .supervisor {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--accent-light);
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+
+    .controls {
+      background: var(--card-bg);
+      padding: 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent-color);
+    }
+
+    .filter-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover, .btn.active {
+      background: var(--accent-color);
+      color: #ffffff;
+      border-color: var(--accent-color);
+    }
+
+    .experiments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .experiment-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      color: #111111;
+    }
+
+    .chapter-tag {
+      font-size: 0.8rem;
+      background: var(--tag-bg);
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .section-title {
+      font-weight: bold;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      color: var(--accent-color);
+    }
+
+    ul, ol {
+      padding-right: 20px;
+      margin-bottom: 10px;
+    }
+
+    li {
+      margin-bottom: 4px;
+      font-size: 0.92rem;
+    }
+
+    .conclusion {
+      background: #f8f9fa;
+      border-right: 3px solid var(--accent-color);
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 15px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>مكتبة أنشطة وتجارب فيزياء السادس العلمي (2026)</h1>
+      <div class="supervisor">إشراف الأستاذ: غزوان محمد</div>
     </header>
 
-    <!-- Main Section -->
-    <main class="max-w-4xl mx-auto w-full flex flex-col gap-4">
-        
-        <!-- Interactive Circuit Canvas Area -->
-        <div class="bg-white border border-slate-300 rounded-xl p-4 shadow-sm flex flex-col items-center relative">
-            
-            <div class="w-full flex justify-between items-center mb-2 px-2 text-xs sm:text-sm text-slate-600 border-b pb-2 border-slate-100">
-                <span class="font-semibold text-slate-700">
-                    <i class="fa-solid fa-hand-pointer text-blue-500 animate-bounce"></i> يمكنك اضغاط المفتاح K مباشرة في الرسم لتشغيله
-                </span>
-                <span id="switchStatusBadge" class="px-3 py-1 rounded-full font-bold bg-slate-100 text-slate-600">
-                    المفتاح متوقف (K = 0)
-                </span>
-            </div>
+    <div class="controls">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="ابحث عن نشاط، تجربة، أو أداة..." oninput="filterExperiments()">
+      </div>
+      <div class="filter-buttons" id="filterButtons">
+        <button class="btn active" onclick="setFilter('all', this)">الكل</button>
+        <button class="btn" onclick="setFilter('1', this)">الفصل 1</button>
+        <button class="btn" onclick="setFilter('2', this)">الفصل 2</button>
+        <button class="btn" onclick="setFilter('3', this)">الفصل 3</button>
+        <button class="btn" onclick="setFilter('4', this)">الفصل 4</button>
+        <button class="btn" onclick="setFilter('5', this)">الفصل 5</button>
+        <button class="btn" onclick="setFilter('6', this)">الفصل 6</button>
+        <button class="btn" onclick="setFilter('7', this)">الفصل 7</button>
+      </div>
+    </div>
 
-            <!-- Canvas -->
-            <canvas id="circuitCanvas" class="w-full h-[340px] border border-slate-100 rounded-lg cursor-pointer bg-white"></canvas>
+    <div class="experiments-list" id="experimentsContainer">
+      <!-- يتم تحميل الأنشطة عبر JavaScript -->
+    </div>
 
-            <!-- Quick Direct Action Buttons -->
-            <div class="w-full grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-100">
-                <button onclick="setSwitchPos(1)" id="btn1" class="py-2.5 px-3 rounded-lg font-bold text-sm border-2 border-blue-600 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-1"></i> موقع (1) - شحن
-                </button>
-                <button onclick="setSwitchPos(0)" id="btn0" class="py-2.5 px-3 rounded-lg font-bold text-sm border-2 border-slate-400 bg-slate-100 text-slate-700 hover:bg-slate-700 hover:text-white transition-all flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-power-off"></i> موقع (0) - قطع
-                </button>
-                <button onclick="setSwitchPos(2)" id="btn2" class="py-2.5 px-3 rounded-lg font-bold text-sm border-2 border-amber-600 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition-all flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-2"></i> موقع (2) - تفريغ
-                </button>
-            </div>
-        </div>
-
-        <!-- Explanation Card -->
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-sm leading-relaxed space-y-3">
-            <h3 class="font-bold text-base text-slate-800 border-b pb-2 border-slate-100 flex items-center gap-2">
-                <i class="fa-solid fa-book-open text-blue-600"></i> ملخص ملاحظات النشاط (وزاري):
-            </h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-sm">
-                <div class="bg-blue-50/60 p-3 rounded-lg border border-blue-100">
-                    <span class="font-bold text-blue-800 block mb-1">عند غلق المفتاح K في موقع (1):</span>
-                    ينحرف مؤشر الجلفانوميتر $G$ لحظياً باتجاه اليمين ويتوهج المصباح $L_1$ بضوء ساطع ثم ينطفئان بسرعة؛ لأن المتسعة تشحن بكامل طاقتها فيصبح فرق جهدها مساوياً لفرق جهد البطارية ($V_C = V_B$).
-                </div>
-
-                <div class="bg-amber-50/60 p-3 rounded-lg border border-amber-100">
-                    <span class="font-bold text-amber-800 block mb-1">عند ربط المفتاح K في موقع (2):</span>
-                    ينحرف مؤشر الجلفانوميتر $G$ بالاتجاه المعاكس (لليسار) ويتوهج المصباح $L_2$ برهة من الزمن ثم ينطفئان؛ بسبب تفريغ شحنة المتسعة تماماً عبر سلك التوصيل.
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="max-w-4xl mx-auto w-full text-center text-xs text-slate-500 py-4 mt-2">
-        محاكاة مبسطة لدائرة شحن وتفريغ المتسعة | إشراف الأستاذ <strong>غزوان محمد</strong>
+    <footer>
+      منهج الفيزياء للصف السادس العلمي - معتمد للعام الدراسي 2025/2026
     </footer>
+  </div>
 
-    <!-- Circuit Logic and Canvas Animation -->
-    <script>
-        let switchPos = 0; // 0 = off, 1 = charge, 2 = discharge
-        let chargeRatio = 0.0; // 0.0 to 1.0
-        let targetCharge = 0.0;
-        let needleAngle = 0; // Galvanometer needle
-        let electronOffset = 0;
-        let currentIntensity = 0; // calculated dynamically
+  <script>
+    const data = [
+      {
+        id: 1,
+        chapter: "1",
+        chapterName: "الفصل الأول: المتسعات",
+        title: "نشاط: شحن وتفريغ المتسعة",
+        tools: ["بطارية ذات فولتية مناسبة", "جلفانوميتر صفر في الوسط (G)", "مصباحان يماثلان L1 و L2", "متسعة C ذات الصفحتين A و B", "مفتاح مزدوج K", "مقاومة R وأسلاك توصيل"],
+        steps: [
+          "ربط الدائرة كما في المخطط بحيث يكون المفتاح K في الموقع 1 (عملية الشحن).",
+          "نلاحظ انحراف مؤشر الجلفانوميتر لحظياً إلى جانب معين (مثلاً اليمين) وتوهج المصباح L1 برهة من الزمن ثم انطفائه وعودة المؤشر إلى الصفر.",
+          "نربط المفتاح K في الموقع 2 (عملية التفريغ).",
+          "نلاحظ انحراف المؤشر بالاتجاه المعاكس وتوهج المصباح L2 برهة من الزمن ثم انطفائه وعودة المؤشر للصفر."
+        ],
+        conclusion: "عند اكتمال شحن المتسعة يتساوى جهد كل صفيحة مع قطب البطارية الموصول بها فتصبح الدائرة مفتوحة. عند التفريغ تفرغ الشحنات عبر السلك الموصل لحظياً."
+      },
+      {
+        id: 2,
+        chapter: "2",
+        chapterName: "الفصل الثاني: الحث الكهرومغناطيسي",
+        title: "نشاط: ظاهرة الحث الكهرومغناطيسي (تجربة فرداي)",
+        tools: ["ملفان سلكيان مجوفان أحدهما يدخل في الآخر", "جلفانوميتر صفر الوسط", "ساق مغناطيسية", "بطارية", "مفتاح كهربائي", "أسلاك توصيل"],
+        steps: [
+          "ربط أحد الملفين بالجلفانوميتر وتقريب/إبعاد الساق المغناطيسية عنه.",
+          "نلاحظ انحراف المؤشر باتجاه معين عند التقريب وباتجاه معاكس عند الإبعاد وتوقفه عند ثبوت الساق.",
+          "ربط الملف الثاني بالبطارية والمفتاح (ملف ابتدائي) وإدخاله داخل الملف الأول.",
+          "فتح وغلق المفتاح الكهربائي ونلاحظ انحراف مؤشر الجلفانوميتر لحظة الغلق ولحظة الفتح."
+        ],
+        conclusion: "تستحث قوة دافعة كهربائية وتيار محث في دائرة كهربائية مغلقة فقط عند حصول تغير في الفيض المغناطيسي الذي يخترق الدائرة لوحدة الزمن."
+      },
+      {
+        id: 3,
+        chapter: "2",
+        chapterName: "الفصل الثاني: الحث الكهرومغناطيسي",
+        title: "نشاط: ظاهرة الحث الذاتي",
+        tools: ["ملف سلكي في جوفه قلب من الحديد المطاوع", "مصباح نيون يحتاج 80V", "بطارية فولتيتها 9V", "مفتاح كهربائي", "أسلاك توصيل"],
+        steps: [
+          "نربط الملف والمفتاح والبطارية على التوالي، ونربط مصباح النيون على التوازي مع الملف.",
+          "نغلق دائرة المفتاح: نلاحظ عدم توهج مصباح النيون.",
+          "نفتح دائرة المفتاح: نلاحظ توهج مصباح النيون لبرهة قصيرة من الزمن."
+        ],
+        conclusion: "يتولد على طرفي الملف قوة دافعة كهربائية محثة ذاتية كبيرة جداً لحظة الفتح بسبب التلاشي السريع للتيار تكفي لتوهج المصباح."
+      },
+      {
+        id: 4,
+        chapter: "3",
+        chapterName: "الفصل الثالث: التيار المتناوب",
+        title: "نشاط: تأثير تغير تردد التيار (f) في رادة الحث (XL)",
+        tools: ["مذيذب كهربائي (مصدر متناوب متغير التردد)", "أميتر", "فولطميتر", "ملف مهمل المقاومة", "مفتاح كهربائي"],
+        steps: [
+          "نربط الملف والأميتر والمذيذب على التوالي، والفولطميتر على التوازي مع الملف.",
+          "نزيد تردد المذيذب مع الحفاظ على ثبوت قراءة الفولطميتر.",
+          "نلاحظ نقصان قراءة الأميتر (نقصان التيار)."
+        ],
+        conclusion: "رادة الحث XL تتناسب طردياً مع تردد المصدر (f) بثبوت معامل الحث الذاتي (L)."
+      },
+      {
+        id: 5,
+        chapter: "3",
+        chapterName: "الفصل الثالث: التيار المتناوب",
+        title: "نشاط: تأثير تغير تردد الفولتية (f) في رادة السعة (XC)",
+        tools: ["مذيذب كهربائي", "أميتر", "فولطميتر", "متسعة ذات صفحتين متوازيتين", "مفتاح كهربائي"],
+        steps: [
+          "نربط المتسعة والأميتر والمذيذب على التوالي، والفولطميتر على التوازي مع المتسعة.",
+          "نزيد تردد المذيذب تدريجياً مع الحفاظ على فرق الجهد ثابتاً.",
+          "نلاحظ زيادة قراءة الأميتر (زيادة التيار)."
+        ],
+        conclusion: "رادة السعة XC تتناسب عكسياً مع تردد مصدر الفولتية (f) بثبوت سعة المتسعة (C)."
+      },
+      {
+        id: 6,
+        chapter: "4",
+        chapterName: "الفصل الرابع: البصريات الموجية",
+        title: "نشاط: تجربة شقّي يونغ",
+        tools: ["حاجز ذو شق واحد", "حاجز ذو شقين ضيقين متماثلين", "شاشة", "مصدر ضوئي أحادي اللون"],
+        steps: [
+          "يضاء الشق الأول بالضوء أحادي اللون ثم يسقط الضوء على الشقين المزدوجين.",
+          "نلاحظ على الشاشة ظهور مناطق مضيئة وأخرى مظلمة متعاقبة تسمى (هدب التداخل)."
+        ],
+        conclusion: "إثبات الطبيعة الموجية للضوء وحساب الطول الموجي للضوء المستعمل من خلال قانون التداخل."
+      },
+      {
+        id: 7,
+        chapter: "5",
+        chapterName: "الفصل الخامس: الفيزياء الحديثة",
+        title: "نشاط: دراسة الظاهرة الكهروضوئية",
+        tools: ["خلية كهروضوئية", "فولطميتر", "أميتر رقمي", "مصدر فولتية مستمرة يمكن تغيير جهده", "مصدر ضوئي"],
+        steps: [
+          "نربط الخلية والأميتر والمصدر على التوالي والفولطميتر على التوازي.",
+          "نضيء لوح الخلية (الباعث) بضوء تردده أكبر من تردد العتبة، ونلاحظ انحراف الأميتر.",
+          "عند زيادة شدة الضوء المضاء نلاحظ زيادة تيار الإشباع.",
+          "عند عكس قطبية المصدر يصبح التيار صفراً عند جهد معين يسمى (جهد القطع أو الإيقاف)."
+        ],
+        conclusion: "انبعاث الإلكترونات الضوئية يعتمد على تردد الضوء الساقط، وشدة الضوء تزيد من عدد الإلكترونات المنبعثة (تيار الإشباع)."
+      },
+      {
+        id: 8,
+        chapter: "6",
+        chapterName: "الفصل السادس: فيزياء الحالة الصلبة",
+        title: "نشاط: توليد الأزواج (إلكترون - فجوة) بالتأثير الحراري",
+        tools: ["بلورة شبه موصل نقي (سليكون أو جيرمانيوم)", "مصدر حراري", "أميتر حساس", "مصدر فولتية مستمر"],
+        steps: [
+          "نربط البلورة في دائرة كهربائية مغلقة مع الأميتر والمصدر.",
+          "في درجة حرارة الصفر المطلق تكون البلورة عازلة ولا يسري تيار.",
+          "عند رفع درجة الحرارة نلاحظ انحراف مؤشر الأميتر متزايداً."
+        ],
+        conclusion: "الطاقة الحرارية تكسر الأواصر التساهمية وتولد أزواجاً من (الإلكترونات والفجوات) مما يزيد القابلية للتوصيل الكهربائي."
+      },
+      {
+        id: 9,
+        chapter: "7",
+        chapterName: "الفصل السابع: الأطياف الذرية والليزر",
+        title: "نشاط: دراسة أنواع الأطياف (دراسة طيف الانبعاث والامتصاص)",
+        tools: ["مطياف", "منشور زجاجي", "أنابيب تفريغ تحتوي غازات مختلفة (هيدروجين، نيون)", "مصدر كهربائي عالي الجهد"],
+        steps: [
+          "نربط أنبوب التفريغ بالمصدر العالي الجهد ليتوهج الغاز.",
+          "ننسق الضوء الساقط من الأنبوب ليمر عبر شق المطياف ويدخل المنشور.",
+          "نلاحظ الصور الملونة (الأطياف) الظاهرة عبر تلسكوب المطياف."
+        ],
+        conclusion: "الأطياف تقسم إلى أطياف انبعاث (مستمرة، خطية، حزمية) وأطياف امتصاص، ولكل عنصر طيف خطي خاص ومميز يعتبر بصمة ذرية له."
+      }
+    ];
 
-        // Canvas Setup
-        const canvas = document.getElementById('circuitCanvas');
-        const ctx = canvas.getContext('2d');
+    let currentChapter = 'all';
 
-        // Switch Hitbox for Canvas Click
-        let switchHitbox = { x: 0, y: 0, r: 35 };
+    function renderExperiments() {
+      const container = document.getElementById('experimentsContainer');
+      const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+      container.innerHTML = '';
 
-        window.onload = function() {
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            
-            // Allow Clicking directly on Canvas to toggle switch!
-            canvas.addEventListener('click', handleCanvasClick);
-            
-            // Start Loop
-            requestAnimationFrame(animate);
-        };
+      const filteredData = data.filter(item => {
+        const matchesChapter = (currentChapter === 'all' || item.chapter === currentChapter);
+        const matchesSearch = item.title.toLowerCase().includes(searchVal) ||
+                              item.tools.some(t => t.toLowerCase().includes(searchVal)) ||
+                              item.chapterName.toLowerCase().includes(searchVal);
+        return matchesChapter && matchesSearch;
+      });
 
-        function resizeCanvas() {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width - 32;
-            canvas.height = 340;
-        }
+      if (filteredData.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding: 30px; color: #777;">لا توجد أنشطة تطابق البحث.</div>';
+        return;
+      }
 
-        function setSwitchPos(pos) {
-            switchPos = pos;
-            if (pos === 1) {
-                targetCharge = 1.0;
-            } else if (pos === 2) {
-                targetCharge = 0.0;
-            }
+      filteredData.forEach(exp => {
+        const card = document.createElement('div');
+        card.className = 'experiment-card';
 
-            // Update UI status
-            const badge = document.getElementById('switchStatusBadge');
-            if (pos === 1) {
-                badge.innerText = 'عملية الشحن (K = 1)';
-                badge.className = 'px-3 py-1 rounded-full font-bold bg-blue-100 text-blue-700 border border-blue-300';
-            } else if (pos === 2) {
-                badge.innerText = 'عملية التفريغ (K = 2)';
-                badge.className = 'px-3 py-1 rounded-full font-bold bg-amber-100 text-amber-700 border border-amber-300';
-            } else {
-                badge.innerText = 'المفتاح متوقف (K = 0)';
-                badge.className = 'px-3 py-1 rounded-full font-bold bg-slate-100 text-slate-600';
-            }
-        }
+        const toolsList = exp.tools.map(t => `<li>${t}</li>`).join('');
+        const stepsList = exp.steps.map(s => `<li>${s}</li>`).join('');
 
-        function handleCanvasClick(e) {
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
+        card.innerHTML = `
+          <div class="card-header">
+            <h2 class="card-title">${exp.title}</h2>
+            <span class="chapter-tag">${exp.chapterName}</span>
+          </div>
+          <div class="section-title">أدوات النشاط:</div>
+          <ul>${toolsList}</ul>
+          <div class="section-title">خطوات النشاط:</div>
+          <ol>${stepsList}</ol>
+          <div class="conclusion">
+            <strong>الاستنتاج: </strong>${exp.conclusion}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
 
-            // Check if user clicked near switch area
-            const dist = Math.hypot(mouseX - switchHitbox.x, mouseY - switchHitbox.y);
-            if (dist <= switchHitbox.r + 15) {
-                // Cycle switch: 0 -> 1 -> 2 -> 0
-                if (switchPos === 0) setSwitchPos(1);
-                else if (switchPos === 1) setSwitchPos(2);
-                else setSwitchPos(0);
-            }
-        }
+    function setFilter(chap, btn) {
+      currentChapter = chap;
+      document.querySelectorAll('.filter-buttons .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderExperiments();
+    }
 
-        // --- Physics Engine & Rendering ---
-        function animate() {
-            // Smooth charge transition
-            let prevCharge = chargeRatio;
-            let speed = 0.04;
-            
-            if (switchPos === 1) {
-                chargeRatio += (1.0 - chargeRatio) * speed;
-            } else if (switchPos === 2) {
-                chargeRatio += (0.0 - chargeRatio) * speed;
-            }
+    function filterExperiments() {
+      renderExperiments();
+    }
 
-            // Calculate instantaneous current (dQ/dt)
-            currentIntensity = (chargeRatio - prevCharge) * 25;
-
-            // Galvanometer needle target deflection
-            let targetNeedle = currentIntensity * 22; // Right for (+), Left for (-)
-            needleAngle += (targetNeedle - needleAngle) * 0.2;
-
-            // Update electrons position
-            electronOffset += currentIntensity * 2;
-
-            // Draw everything clean & basic
-            drawBasicCircuit();
-
-            requestAnimationFrame(animate);
-        }
-
-        function drawBasicCircuit() {
-            const w = canvas.width;
-            const h = canvas.height;
-            ctx.clearRect(0, 0, w, h);
-
-            // Coordinates
-            const marginX = Math.max(50, w * 0.12);
-            const marginY = 40;
-            const leftX = marginX;
-            const rightX = w - marginX;
-            const topY = marginY;
-            const midY = h / 2;
-            const botY = h - marginY;
-            const capX = w * 0.5;
-
-            switchHitbox.x = rightX - 20;
-            switchHitbox.y = midY;
-
-            // 1. Draw Wires (Thick High-Contrast Black/Dark Lines)
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#1e293b';
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-
-            // Top Line
-            ctx.beginPath();
-            ctx.moveTo(leftX, topY);
-            ctx.lineTo(rightX, topY);
-            ctx.stroke();
-
-            // Middle Line
-            ctx.beginPath();
-            ctx.moveTo(leftX, midY);
-            ctx.lineTo(rightX - 35, midY);
-            ctx.stroke();
-
-            // Bottom Line
-            ctx.beginPath();
-            ctx.moveTo(leftX, botY);
-            ctx.lineTo(rightX, botY);
-            ctx.stroke();
-
-            // Vertical Left Wire
-            ctx.beginPath();
-            ctx.moveTo(leftX, topY);
-            ctx.lineTo(leftX, botY);
-            ctx.stroke();
-
-            // Vertical Right Lines to Switch terminals
-            ctx.beginPath();
-            ctx.moveTo(rightX, topY);
-            ctx.lineTo(rightX, midY - 20); // Terminal 2
-            ctx.moveTo(rightX, botY);
-            ctx.lineTo(rightX, midY + 20); // Terminal 1
-            ctx.stroke();
-
-            // 2. Draw Current Flow (Blue Moving Dots)
-            if (Math.abs(currentIntensity) > 0.001) {
-                ctx.fillStyle = '#2563eb';
-                const step = 20;
-                
-                if (switchPos === 1) { // Bottom Loop
-                    // Draw moving dots in lower loop
-                    for (let x = leftX; x <= rightX; x += step) {
-                        let offset = (x + electronOffset) % step;
-                        ctx.beginPath();
-                        ctx.arc(leftX + (x - leftX + offset) % (rightX - leftX), botY, 3, 0, Math.PI * 2);
-                        ctx.fill();
-
-                        ctx.beginPath();
-                        ctx.arc(leftX + (x - leftX - offset + (rightX - leftX)) % (rightX - leftX), midY, 3, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                } else if (switchPos === 2) { // Top Loop
-                    for (let x = leftX; x <= rightX; x += step) {
-                        let offset = (x + electronOffset) % step;
-                        ctx.beginPath();
-                        ctx.arc(leftX + (x - leftX + offset) % (rightX - leftX), topY, 3, 0, Math.PI * 2);
-                        ctx.fill();
-
-                        ctx.beginPath();
-                        ctx.arc(leftX + (x - leftX - offset + (rightX - leftX)) % (rightX - leftX), midY, 3, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-            }
-
-
-            // 3. Components Drawing (Clean textbook style)
-
-            // --- Capacitor C ---
-            const capH = 40;
-            const capGap = 16;
-            ctx.clearRect(capX - capGap - 6, midY - capH/2 - 2, capGap * 2 + 12, capH + 4);
-
-            // Plate A
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(capX - capGap/2 - 5, midY - capH/2, 5, capH);
-            ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 13px Cairo';
-            ctx.fillText('A', capX - capGap/2 - 14, midY - capH/2 - 5);
-
-            // Plate B
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(capX + capGap/2, midY - capH/2, 5, capH);
-            ctx.fillText('B', capX + capGap/2 + 5, midY - capH/2 - 5);
-
-            ctx.fillText('المتسعة C', capX - 24, midY + capH/2 + 18);
-
-            // Charges on Plates
-            if (chargeRatio > 0.05) {
-                const count = Math.min(5, Math.floor(chargeRatio * 5) + 1);
-                ctx.font = 'bold 11px monospace';
-
-                // Plate A (+)
-                ctx.fillStyle = '#dc2626';
-                for (let i = 0; i < count; i++) {
-                    ctx.fillText('+', capX - capGap/2 - 16, midY - capH/2 + 8 + i * 8);
-                }
-
-                // Plate B (-)
-                ctx.fillStyle = '#2563eb';
-                for (let i = 0; i < count; i++) {
-                    ctx.fillText('-', capX + capGap/2 + 14, midY - capH/2 + 8 + i * 8);
-                }
-            }
-
-
-            // --- Galvanometer G ---
-            const galvX = leftX + (capX - leftX) * 0.45;
-            const gRadius = 20;
-
-            ctx.clearRect(galvX - gRadius, midY - gRadius, gRadius * 2, gRadius * 2);
-            ctx.beginPath();
-            ctx.arc(galvX, midY, gRadius, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Center Text G
-            ctx.fillStyle = '#64748b';
-            ctx.font = 'bold 11px Cairo';
-            ctx.fillText('G', galvX - 4, midY + 14);
-
-            // Zero Tick Line
-            ctx.beginPath();
-            ctx.moveTo(galvX, midY - gRadius);
-            ctx.lineTo(galvX, midY - gRadius + 5);
-            ctx.strokeStyle = '#94a3b8';
-            ctx.stroke();
-
-            // Needle
-            ctx.save();
-            ctx.translate(galvX, midY + 2);
-            ctx.rotate(needleAngle * Math.PI / 180);
-            ctx.strokeStyle = '#dc2626';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(0, -gRadius + 4);
-            ctx.stroke();
-            ctx.restore();
-
-
-            // --- Bulbs L1 & L2 ---
-            // L1 (Bottom-Left)
-            drawSimpleBulb(leftX, (midY + botY) / 2, 'L₁', switchPos === 1 ? Math.abs(currentIntensity) : 0);
-            
-            // L2 (Top-Left)
-            drawSimpleBulb(leftX, (midY + topY) / 2, 'L₂', switchPos === 2 ? Math.abs(currentIntensity) : 0);
-
-
-            // --- Battery (Bottom) ---
-            ctx.clearRect(capX - 20, botY - 14, 40, 28);
-            // Long Line (+)
-            ctx.strokeStyle = '#dc2626';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(capX - 6, botY - 14);
-            ctx.lineTo(capX - 6, botY + 14);
-            ctx.stroke();
-            // Short Line (-)
-            ctx.strokeStyle = '#2563eb';
-            ctx.lineWidth = 6;
-            ctx.beginPath();
-            ctx.moveTo(capX + 6, botY - 8);
-            ctx.lineTo(capX + 6, botY + 8);
-            ctx.stroke();
-
-            ctx.fillStyle = '#0f172a';
-            ctx.font = '12px Cairo';
-            ctx.fillText('بطارية', capX - 15, botY + 26);
-
-
-            // --- Resistor R (Bottom Left) ---
-            const resX = leftX + (capX - leftX) * 0.45;
-            const resW = 32;
-            const resH = 12;
-            ctx.clearRect(resX - resW/2, botY - resH/2 - 2, resW, resH + 4);
-            ctx.strokeStyle = '#059669';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(resX - resW/2, botY - resH/2, resW, resH);
-            ctx.fillStyle = '#0f172a';
-            ctx.font = '12px Cairo';
-            ctx.fillText('مقاومة R', resX - 18, botY + 24);
-
-
-            // --- Switch K (Double Throw) ---
-            const swX = rightX - 35;
-
-            // Terminals
-            ctx.fillStyle = '#0f172a';
-            // Terminal 1 (Bottom)
-            ctx.beginPath(); ctx.arc(rightX, midY + 20, 4, 0, Math.PI * 2); ctx.fill();
-            ctx.fillText('1', rightX + 8, midY + 24);
-
-            // Terminal 2 (Top)
-            ctx.beginPath(); ctx.arc(rightX, midY - 20, 4, 0, Math.PI * 2); ctx.fill();
-            ctx.fillText('2', rightX + 8, midY - 16);
-
-            // Pivot Center Point
-            ctx.fillStyle = '#d97706';
-            ctx.beginPath(); ctx.arc(swX, midY, 5, 0, Math.PI * 2); ctx.fill();
-
-            // Switch Blade Line
-            ctx.strokeStyle = '#d97706';
-            ctx.lineWidth = 3.5;
-            ctx.beginPath();
-            ctx.moveTo(swX, midY);
-
-            if (switchPos === 1) {
-                ctx.lineTo(rightX, midY + 20); // Connect to 1
-            } else if (switchPos === 2) {
-                ctx.lineTo(rightX, midY - 20); // Connect to 2
-            } else {
-                ctx.lineTo(swX + 15, midY - 8); // Disconnected
-            }
-            ctx.stroke();
-
-            ctx.fillStyle = '#d97706';
-            ctx.font = 'bold 13px Cairo';
-            ctx.fillText('المفتاح K', swX - 15, midY - 22);
-
-            // Click Hint Halo around switch
-            ctx.strokeStyle = '#3b82f6';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([3, 3]);
-            ctx.beginPath();
-            ctx.arc(swX + 15, midY, 28, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.setLineDash([]); // Reset
-        }
-
-        function drawSimpleBulb(x, y, label, current) {
-            const r = 14;
-            ctx.clearRect(x - r - 2, y - r - 2, r * 2 + 4, r * 2 + 4);
-
-            ctx.beginPath();
-            ctx.arc(x, y, r, 0, Math.PI * 2);
-            
-            // Yellow fill when lighted up
-            if (current > 0.02) {
-                ctx.fillStyle = `rgba(234, 179, 8, ${Math.min(1, current * 2)})`;
-            } else {
-                ctx.fillStyle = '#ffffff';
-            }
-            ctx.fill();
-
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Filament 'X'
-            ctx.beginPath();
-            ctx.moveTo(x - 4, y - 4); ctx.lineTo(x + 4, y + 4);
-            ctx.moveTo(x + 4, y - 4); ctx.lineTo(x - 4, y + 4);
-            ctx.strokeStyle = '#475569';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            // Label
-            ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 12px Cairo';
-            ctx.fillText('المصباح ' + label, x - 54, y + 4);
-        }
-    </script>
+    // التشغيل الأول
+    renderExperiments();
+  </script>
 </body>
 </html>
