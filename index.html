@@ -1,397 +1,2628 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>أنشطة وتجارب فيزياء السادس العلمي | إشراف الأستاذ غزوان محمد</title>
-  <style>
-    :root {
-      --bg-color: #fcfcfc;
-      --card-bg: #ffffff;
-      --text-color: #222222;
-      --text-muted: #555555;
-      --border-color: #dddddd;
-      --accent-color: #1a73e8;
-      --accent-light: #e8f0fe;
-      --tag-bg: #eeeeee;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مختبر الفيزياء الرقمي - بإشراف الأستاذ غزوان محمد</title>
+    <!-- تحميل Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- تحميل خط Cairo و Tajawal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- أيقونات Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        tajawal: ['Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
+        /* شريط التمرير البسيط */
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      line-height: 1.6;
-      padding: 20px;
-    }
+        /* شريط تمرير الفصول بدون ظهور شريط مزعج */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
+        /* شاشة الـ Intro */
+        #introScreen {
+            transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1), transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #introScreen.intro-hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.03);
+        }
 
-    header {
-      text-align: center;
-      padding: 25px 15px;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      margin-bottom: 25px;
-    }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
 
-    h1 {
-      font-size: 1.6rem;
-      color: var(--text-color);
-      margin-bottom: 8px;
-    }
+        /* مساحة المختبر الكبيرة */
+        .lab-stage-wrapper {
+            min-height: 460px;
+            touch-action: none; /* مهم لدعم السحب والإفلات باللمس بسلاسة */
+            user-select: none;
+        }
+        @media (min-width: 768px) {
+            .lab-stage-wrapper {
+                min-height: 500px;
+            }
+        }
 
-    .supervisor {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--accent-color);
-      display: inline-block;
-      padding: 4px 12px;
-      background: var(--accent-light);
-      border-radius: 4px;
-      margin-top: 5px;
-    }
+        /* وضع ملء الشاشة للمختبر */
+        .lab-fullscreen {
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 60 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        .lab-fullscreen canvas {
+            flex: 1;
+            height: 100% !important;
+        }
 
-    .controls {
-      background: var(--card-bg);
-      padding: 15px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      margin-bottom: 25px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
+        /* مؤشر السحب */
+        .cursor-grab-custom {
+            cursor: grab;
+        }
+        .cursor-grab-custom:active {
+            cursor: grabbing;
+        }
 
-    .search-box input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      font-size: 0.95rem;
-      outline: none;
-    }
+        /* تأثير إخفاء الاستنتاج للاختبار الذاتي */
+        .blurred-conclusion {
+            filter: blur(7px);
+            user-select: none;
+            pointer-events: none;
+            transition: filter 0.25s ease;
+        }
 
-    .search-box input:focus {
-      border-color: var(--accent-color);
-    }
+        .math-ltr {
+            direction: ltr;
+            display: inline-block;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 700;
+        }
 
-    .filter-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .btn {
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
-
-    .btn:hover, .btn.active {
-      background: var(--accent-color);
-      color: #ffffff;
-      border-color: var(--accent-color);
-    }
-
-    .experiments-list {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .experiment-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 20px;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .card-title {
-      font-size: 1.2rem;
-      color: #111111;
-    }
-
-    .chapter-tag {
-      font-size: 0.8rem;
-      background: var(--tag-bg);
-      color: var(--text-muted);
-      padding: 3px 8px;
-      border-radius: 4px;
-      white-space: nowrap;
-    }
-
-    .section-title {
-      font-weight: bold;
-      margin-top: 12px;
-      margin-bottom: 6px;
-      font-size: 0.95rem;
-      color: var(--accent-color);
-    }
-
-    ul, ol {
-      padding-right: 20px;
-      margin-bottom: 10px;
-    }
-
-    li {
-      margin-bottom: 4px;
-      font-size: 0.92rem;
-    }
-
-    .conclusion {
-      background: #f8f9fa;
-      border-right: 3px solid var(--accent-color);
-      padding: 10px 12px;
-      margin-top: 10px;
-      font-size: 0.9rem;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      padding: 15px;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      border-top: 1px solid var(--border-color);
-    }
-  </style>
+        /* تخصيص منزلقات الإدخال */
+        input[type="range"] {
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
 
-  <div class="container">
-    <header>
-      <h1>مكتبة أنشطة وتجارب فيزياء السادس العلمي (2026)</h1>
-      <div class="supervisor">إشراف الأستاذ: غزوان محمد</div>
+    <!-- ==================== 1. شاشة المقدمة (INTRO SCREEN) ==================== -->
+    <div id="introScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
+        <!-- خلفية هندسية هادئة جداً -->
+        <div class="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none"
+             style="background-image: radial-gradient(#94a3b8 1px, transparent 1px); background-size: 28px 28px;"></div>
+        
+        <div class="relative max-w-2xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 sm:p-12 text-center shadow-xl">
+            <!-- شعار علمي بسيط -->
+            <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-700 dark:text-blue-400 animate-float">
+                <i class="fa-solid fa-atom text-3xl"></i>
+            </div>
+
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-xs font-bold mb-4 border border-blue-100 dark:border-blue-900">
+                <span>المنهج العراقي • الصف السادس العلمي</span>
+            </div>
+
+            <h1 class="text-2xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
+                مختبر الفيزياء الرقمي التفاعلي
+            </h1>
+
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-lg mx-auto leading-relaxed mb-8">
+                محاكاة عملية شاملة بالسحب والإفلات لجميع الأنشطة الـ 26 في كتاب الفيزياء، مرتبة حسب الفصول مع الأدوات والخطوات والاستنتاجات الوزارية.
+            </p>
+
+            <!-- بطاقة الإشراف للأستاذ غزوان محمد -->
+            <div class="max-w-md mx-auto mb-8 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">إعداد وإشراف</div>
+                <div class="text-xl sm:text-2xl font-extrabold text-blue-800 dark:text-blue-400 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-chalkboard-user text-lg"></i>
+                    <span>الأستاذ غزوان محمد</span>
+                </div>
+            </div>
+
+            <!-- زر الدخول -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button onclick="enterLab()" 
+                    class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-blue-700 hover:bg-blue-800 text-white font-extrabold text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2.5">
+                    <span>دخول المختبر الرقمي</span>
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 2. الهيدر العلوي النظيف ==================== -->
+    <header class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <!-- العنوان واسم الأستاذ -->
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-blue-700 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <i class="fa-solid fa-flask text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h1 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                                مختبر الفيزياء الرقمي
+                            </h1>
+                            <span class="px-2.5 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-extrabold">
+                                بإشراف: الأستاذ غزوان محمد
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                            الصف السادس العلمي • 26 نشاطاً عملياً تفاعلياً بالسحب والإفلات
+                        </p>
+                    </div>
+                </div>
+
+                <!-- أزرار التحكم العلوية -->
+                <div class="flex items-center gap-2">
+                    <!-- زر إعادة عرض المقدمة -->
+                    <button onclick="showIntro()" title="عرض شاشة المقدمة"
+                        class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span class="hidden sm:inline">المقدمة</span>
+                    </button>
+
+                    <!-- زر الوضع الليلي / النهاري -->
+                    <button id="themeToggleBtn" onclick="toggleTheme()" title="تبديل المظهر (نهاري / ليلي)"
+                        class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center justify-center">
+                        <i id="themeIcon" class="fa-solid fa-moon"></i>
+                    </button>
+
+                    <!-- زر اختبار الاستنتاجات -->
+                    <button id="globalQuizBtn" onclick="toggleGlobalQuizMode()"
+                        class="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-blue-500 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-eye-slash text-blue-600 dark:text-blue-400"></i>
+                        <span id="globalQuizLabel">اختبر نفسك</span>
+                    </button>
+
+                    <!-- عداد التقدم -->
+                    <div class="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/70 flex items-center gap-2">
+                        <span class="text-xs font-extrabold text-emerald-700 dark:text-emerald-400">
+                            <span id="completedCount">0</span>/26
+                        </span>
+                        <div class="w-12 h-2 bg-emerald-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div id="progressBar" class="h-full bg-emerald-600 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- شريط البحث -->
+            <div class="mt-3 relative">
+                <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput"
+                    placeholder="ابحث عن أي نشاط، أداة، أو استنتاج (مثال: فراداي، العازل، النيون، التيارات الدوامة، يونك، الأطياف)..."
+                    class="w-full pr-10 pl-20 py-2.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 transition">
+                <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute left-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    مسح
+                </button>
+            </div>
+
+            <!-- تبويبات الفصول -->
+            <div id="chapterTabs" class="mt-3 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                <!-- يتم توليدها ديناميكياً -->
+            </div>
+        </div>
     </header>
 
-    <div class="controls">
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="ابحث عن نشاط، تجربة، أو أداة..." oninput="filterExperiments()">
-      </div>
-      <div class="filter-buttons" id="filterButtons">
-        <button class="btn active" onclick="setFilter('all', this)">الكل</button>
-        <button class="btn" onclick="setFilter('1', this)">الفصل 1</button>
-        <button class="btn" onclick="setFilter('2', this)">الفصل 2</button>
-        <button class="btn" onclick="setFilter('3', this)">الفصل 3</button>
-        <button class="btn" onclick="setFilter('4', this)">الفصل 4</button>
-        <button class="btn" onclick="setFilter('5', this)">الفصل 5</button>
-        <button class="btn" onclick="setFilter('6', this)">الفصل 6</button>
-        <button class="btn" onclick="setFilter('7', this)">الفصل 7</button>
-      </div>
-    </div>
+    <!-- ==================== 3. المحتوى الرئيسي: مساحة المختبر + قائمة الأنشطة ==================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- تخطيط من عمودين: عمود جانبي لاختيار النشاط (320px) + عمود رئيسي واسع جداً للمختبر والتفاصيل -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- القائمة الجانبية للأنشطة (4 أعمدة على الشاشات الكبيرة) -->
+            <aside class="lg:col-span-4 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                <div class="px-4 py-3 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-sm text-slate-800 dark:text-slate-100" id="listHeaderTitle">قائمة الأنشطة</span>
+                        <span id="filteredCountBadge" class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">26</span>
+                    </div>
+                    <button onclick="resetProgress()" class="text-[11px] text-slate-400 hover:text-rose-600 transition">تصفير الإنجاز</button>
+                </div>
 
-    <div class="experiments-list" id="experimentsContainer">
-      <!-- يتم تحميل الأنشطة عبر JavaScript -->
-    </div>
+                <div id="activitiesList" class="divide-y divide-slate-100 dark:divide-slate-800 max-h-[420px] lg:max-h-[calc(100vh-230px)] overflow-y-auto">
+                    <!-- يتم توليد عناصر القائمة هنا -->
+                </div>
+            </aside>
 
-    <footer>
-      منهج الفيزياء للصف السادس العلمي - معتمد للعام الدراسي 2025/2026
+            <!-- مساحة العمل الرئيسية الواسعة (8 أعمدة على الشاشات الكبيرة) -->
+            <section id="workspaceContainer" class="lg:col-span-8 space-y-6">
+                <!-- يتم عرض النشاط المختار ومساحة المختبر الكبيرة هنا -->
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ==================== 4. الفوتر ==================== -->
+    <footer class="mt-12 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-5 text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="font-bold text-slate-700 dark:text-slate-200">
+                مختبر الفيزياء الرقمي التفاعلي — الصف السادس العلمي
+            </div>
+            <div class="font-extrabold text-blue-700 dark:text-blue-400">
+                إعداد وإشراف: الأستاذ غزوان محمد
+            </div>
+        </div>
     </footer>
-  </div>
 
-  <script>
-    const data = [
-      {
-        id: 1,
-        chapter: "1",
-        chapterName: "الفصل الأول: المتسعات",
-        title: "نشاط: شحن وتفريغ المتسعة",
-        tools: ["بطارية ذات فولتية مناسبة", "جلفانوميتر صفر في الوسط (G)", "مصباحان يماثلان L1 و L2", "متسعة C ذات الصفحتين A و B", "مفتاح مزدوج K", "مقاومة R وأسلاك توصيل"],
-        steps: [
-          "ربط الدائرة كما في المخطط بحيث يكون المفتاح K في الموقع 1 (عملية الشحن).",
-          "نلاحظ انحراف مؤشر الجلفانوميتر لحظياً إلى جانب معين (مثلاً اليمين) وتوهج المصباح L1 برهة من الزمن ثم انطفائه وعودة المؤشر إلى الصفر.",
-          "نربط المفتاح K في الموقع 2 (عملية التفريغ).",
-          "نلاحظ انحراف المؤشر بالاتجاه المعاكس وتوهج المصباح L2 برهة من الزمن ثم انطفائه وعودة المؤشر للصفر."
-        ],
-        conclusion: "عند اكتمال شحن المتسعة يتساوى جهد كل صفيحة مع قطب البطارية الموصول بها فتصبح الدائرة مفتوحة. عند التفريغ تفرغ الشحنات عبر السلك الموصل لحظياً."
-      },
-      {
-        id: 2,
-        chapter: "2",
-        chapterName: "الفصل الثاني: الحث الكهرومغناطيسي",
-        title: "نشاط: ظاهرة الحث الكهرومغناطيسي (تجربة فرداي)",
-        tools: ["ملفان سلكيان مجوفان أحدهما يدخل في الآخر", "جلفانوميتر صفر الوسط", "ساق مغناطيسية", "بطارية", "مفتاح كهربائي", "أسلاك توصيل"],
-        steps: [
-          "ربط أحد الملفين بالجلفانوميتر وتقريب/إبعاد الساق المغناطيسية عنه.",
-          "نلاحظ انحراف المؤشر باتجاه معين عند التقريب وباتجاه معاكس عند الإبعاد وتوقفه عند ثبوت الساق.",
-          "ربط الملف الثاني بالبطارية والمفتاح (ملف ابتدائي) وإدخاله داخل الملف الأول.",
-          "فتح وغلق المفتاح الكهربائي ونلاحظ انحراف مؤشر الجلفانوميتر لحظة الغلق ولحظة الفتح."
-        ],
-        conclusion: "تستحث قوة دافعة كهربائية وتيار محث في دائرة كهربائية مغلقة فقط عند حصول تغير في الفيض المغناطيسي الذي يخترق الدائرة لوحدة الزمن."
-      },
-      {
-        id: 3,
-        chapter: "2",
-        chapterName: "الفصل الثاني: الحث الكهرومغناطيسي",
-        title: "نشاط: ظاهرة الحث الذاتي",
-        tools: ["ملف سلكي في جوفه قلب من الحديد المطاوع", "مصباح نيون يحتاج 80V", "بطارية فولتيتها 9V", "مفتاح كهربائي", "أسلاك توصيل"],
-        steps: [
-          "نربط الملف والمفتاح والبطارية على التوالي، ونربط مصباح النيون على التوازي مع الملف.",
-          "نغلق دائرة المفتاح: نلاحظ عدم توهج مصباح النيون.",
-          "نفتح دائرة المفتاح: نلاحظ توهج مصباح النيون لبرهة قصيرة من الزمن."
-        ],
-        conclusion: "يتولد على طرفي الملف قوة دافعة كهربائية محثة ذاتية كبيرة جداً لحظة الفتح بسبب التلاشي السريع للتيار تكفي لتوهج المصباح."
-      },
-      {
-        id: 4,
-        chapter: "3",
-        chapterName: "الفصل الثالث: التيار المتناوب",
-        title: "نشاط: تأثير تغير تردد التيار (f) في رادة الحث (XL)",
-        tools: ["مذيذب كهربائي (مصدر متناوب متغير التردد)", "أميتر", "فولطميتر", "ملف مهمل المقاومة", "مفتاح كهربائي"],
-        steps: [
-          "نربط الملف والأميتر والمذيذب على التوالي، والفولطميتر على التوازي مع الملف.",
-          "نزيد تردد المذيذب مع الحفاظ على ثبوت قراءة الفولطميتر.",
-          "نلاحظ نقصان قراءة الأميتر (نقصان التيار)."
-        ],
-        conclusion: "رادة الحث XL تتناسب طردياً مع تردد المصدر (f) بثبوت معامل الحث الذاتي (L)."
-      },
-      {
-        id: 5,
-        chapter: "3",
-        chapterName: "الفصل الثالث: التيار المتناوب",
-        title: "نشاط: تأثير تغير تردد الفولتية (f) في رادة السعة (XC)",
-        tools: ["مذيذب كهربائي", "أميتر", "فولطميتر", "متسعة ذات صفحتين متوازيتين", "مفتاح كهربائي"],
-        steps: [
-          "نربط المتسعة والأميتر والمذيذب على التوالي، والفولطميتر على التوازي مع المتسعة.",
-          "نزيد تردد المذيذب تدريجياً مع الحفاظ على فرق الجهد ثابتاً.",
-          "نلاحظ زيادة قراءة الأميتر (زيادة التيار)."
-        ],
-        conclusion: "رادة السعة XC تتناسب عكسياً مع تردد مصدر الفولتية (f) بثبوت سعة المتسعة (C)."
-      },
-      {
-        id: 6,
-        chapter: "4",
-        chapterName: "الفصل الرابع: البصريات الموجية",
-        title: "نشاط: تجربة شقّي يونغ",
-        tools: ["حاجز ذو شق واحد", "حاجز ذو شقين ضيقين متماثلين", "شاشة", "مصدر ضوئي أحادي اللون"],
-        steps: [
-          "يضاء الشق الأول بالضوء أحادي اللون ثم يسقط الضوء على الشقين المزدوجين.",
-          "نلاحظ على الشاشة ظهور مناطق مضيئة وأخرى مظلمة متعاقبة تسمى (هدب التداخل)."
-        ],
-        conclusion: "إثبات الطبيعة الموجية للضوء وحساب الطول الموجي للضوء المستعمل من خلال قانون التداخل."
-      },
-      {
-        id: 7,
-        chapter: "5",
-        chapterName: "الفصل الخامس: الفيزياء الحديثة",
-        title: "نشاط: دراسة الظاهرة الكهروضوئية",
-        tools: ["خلية كهروضوئية", "فولطميتر", "أميتر رقمي", "مصدر فولتية مستمرة يمكن تغيير جهده", "مصدر ضوئي"],
-        steps: [
-          "نربط الخلية والأميتر والمصدر على التوالي والفولطميتر على التوازي.",
-          "نضيء لوح الخلية (الباعث) بضوء تردده أكبر من تردد العتبة، ونلاحظ انحراف الأميتر.",
-          "عند زيادة شدة الضوء المضاء نلاحظ زيادة تيار الإشباع.",
-          "عند عكس قطبية المصدر يصبح التيار صفراً عند جهد معين يسمى (جهد القطع أو الإيقاف)."
-        ],
-        conclusion: "انبعاث الإلكترونات الضوئية يعتمد على تردد الضوء الساقط، وشدة الضوء تزيد من عدد الإلكترونات المنبعثة (تيار الإشباع)."
-      },
-      {
-        id: 8,
-        chapter: "6",
-        chapterName: "الفصل السادس: فيزياء الحالة الصلبة",
-        title: "نشاط: توليد الأزواج (إلكترون - فجوة) بالتأثير الحراري",
-        tools: ["بلورة شبه موصل نقي (سليكون أو جيرمانيوم)", "مصدر حراري", "أميتر حساس", "مصدر فولتية مستمر"],
-        steps: [
-          "نربط البلورة في دائرة كهربائية مغلقة مع الأميتر والمصدر.",
-          "في درجة حرارة الصفر المطلق تكون البلورة عازلة ولا يسري تيار.",
-          "عند رفع درجة الحرارة نلاحظ انحراف مؤشر الأميتر متزايداً."
-        ],
-        conclusion: "الطاقة الحرارية تكسر الأواصر التساهمية وتولد أزواجاً من (الإلكترونات والفجوات) مما يزيد القابلية للتوصيل الكهربائي."
-      },
-      {
-        id: 9,
-        chapter: "7",
-        chapterName: "الفصل السابع: الأطياف الذرية والليزر",
-        title: "نشاط: دراسة أنواع الأطياف (دراسة طيف الانبعاث والامتصاص)",
-        tools: ["مطياف", "منشور زجاجي", "أنابيب تفريغ تحتوي غازات مختلفة (هيدروجين، نيون)", "مصدر كهربائي عالي الجهد"],
-        steps: [
-          "نربط أنبوب التفريغ بالمصدر العالي الجهد ليتوهج الغاز.",
-          "ننسق الضوء الساقط من الأنبوب ليمر عبر شق المطياف ويدخل المنشور.",
-          "نلاحظ الصور الملونة (الأطياف) الظاهرة عبر تلسكوب المطياف."
-        ],
-        conclusion: "الأطياف تقسم إلى أطياف انبعاث (مستمرة، خطية، حزمية) وأطياف امتصاص، ولكل عنصر طيف خطي خاص ومميز يعتبر بصمة ذرية له."
-      }
-    ];
+    <!-- ==================== 5. البيانات ومحرك المحاكاة التفاعلية ==================== -->
+    <script>
+        // تعريف الفصول
+        const chapters = [
+            { id: 'all', title: 'الكل', short: 'الكل' },
+            { id: 'ch1', title: 'الفصل الأول: المتسعات', short: 'ف1: المتسعات' },
+            { id: 'ch2', title: 'الفصل الثاني: الحث الكهرومغناطيسي', short: 'ف2: الحث' },
+            { id: 'ch3', title: 'الفصل الثالث: التيار المتناوب', short: 'ف3: المتناوب' },
+            { id: 'ch4', title: 'الفصل الرابع: الموجات الكهرومغناطيسية', short: 'ف4: الموجات' },
+            { id: 'ch5', title: 'الفصل الخامس: البصريات الفيزيائية', short: 'ف5: البصريات' },
+            { id: 'ch6', title: 'الفصل السادس: الفيزياء الحديثة', short: 'ف6: الحديثة' },
+            { id: 'ch8', title: 'الفصل الثامن: الأطياف الذرية والليزر', short: 'ف8: الأطياف' }
+        ];
 
-    let currentChapter = 'all';
+        // قاعدة بيانات الأنشطة الـ 26 الكاملة
+        const activities = [
+            // ================= الفصل الأول: المتسعات (5) =================
+            {
+                id: 'ch1_1', chapter: 'ch1', chapterName: 'الفصل الأول: المتسعات', number: 'نشاط (1)',
+                ministry: 'وزاري: د2/ت 2013 • د3 2016',
+                title: 'تأثير إدخال العازل الكهربائي بين صفيحتي متسعة مشحونة ومفصولة (تجربة فراداي)',
+                question: 'اشرح نشاطاً يبين تأثير إدخال العازل الكهربائي بين صفيحتي متسعة مشحونة ومفصولة عن البطارية في مقدار فرق الجهد الكهربائي بينهما، وما تأثيره في سعة المتسعة؟',
+                interactionHint: 'اسحب لوح المادة العازلة (K) بالماوس أو اللمس وأدخله بين صفيحتي المتسعة المشحونة، وراقب الفولطميتر والسعة.',
+                hasDrag: true,
+                tools: [
+                    'متسعة ذات الصفيحتين المتوازيتين (العازل بينهما هواء) غير مشحونة.',
+                    'بطارية فولطيتها مناسبة.',
+                    'جهاز فولطميتر وأسلاك توصيل.',
+                    'لوح من مادة عازلة كهربائياً ثابت عزلها (K).'
+                ],
+                steps: [
+                    'نربط أحد قطبي البطارية بإحدى الصفيحتين، ثم نربط القطب الآخر بالصفيحة الثانية؛ ستنشحن إحدى الصفيحتين بالشحنة الموجبة (+Q) والأخرى بالشحنة السالبة (-Q).',
+                    'نفصل البطارية عن الصفيحتين.',
+                    'نربط الطرف الموجب للفولطميتر بالصفيحة الموجبة ونربط طرفه السالب بالصفيحة السالبة؛ نلاحظ انحراف مؤشر الفولطميتر عند قراءة معينة (ΔV).',
+                    'ندخل اللوح العازل بين صفيحتي المتسعة المشحونة، نلاحظ حصول نقصان في قراءة الفولطميتر (ΔV_k = ΔV / K).'
+                ],
+                conclusion: [
+                    'إدخال عازل كهربائي ثابت عزله (K) بين صفيحتي المتسعة المشحونة يتسبب في إنقاص فرق الجهد (ΔV) بينهما بنسبة ثابت العزل (K) فتكون: ΔV_k = ΔV / K.',
+                    'سعة المتسعة (C) تزداد بسبب نقصان فرق الجهد (ΔV) بين الصفيحتين بثبوت مقدار الشحنة (Q) وفق العلاقة: C = Q / ΔV.',
+                    'سعة المتسعة (C) تزداد بوجود العازل الكهربائي حيث تزداد بنسبة (K) فتكون: C_k = K · C.'
+                ],
+                simType: 'cap_dielectric'
+            },
+            {
+                id: 'ch1_2', chapter: 'ch1', chapterName: 'الفصل الأول: المتسعات', number: 'نشاط (2)',
+                ministry: 'سؤال عملي منهجي',
+                title: 'تغير مقدار سعة المتسعة (C) عند تغير المساحة السطحية (A) المتقابلة للصفيحتين',
+                question: 'وضح عملياً كيف يتغير مقدار سعة المتسعة (C) ذات الصفيحتين المتوازيتين عند تغير المساحة السطحية (A) المتقابلة للصفيحتين؟',
+                interactionHint: 'اسحب الصفيحة السفلية المتحركة جانباً لتقليل المساحة السطحية المتقابلة (A) وراقب تضاعف قراءة الفولطميتر.',
+                hasDrag: true,
+                tools: [
+                    'متسعة ذات الصفيحتين المتوازيتين مشحونة بشحنة (Q) ومفصولة عن مصدر الفولطية.',
+                    'جهاز فولطميتر وأسلاك توصيل.'
+                ],
+                steps: [
+                    'نربط طرفي الفولطميتر بين صفيحتي متسعة مشحونة بشحنة مقدارها (Q) ومفصولة عن مصدر الفولطية.',
+                    'عندما تكون المساحة السطحية المتقابلة لصفيحتي المتسعة تساوي (A) تكون قراءة الفولطميتر عند تدريجة معينة فيكون فرق الجهد بين الصفيحتين يساوي (ΔV).',
+                    'عند تقليل المساحة السطحية المتقابلة للصفيحتين إلى نصف ما كانت عليه (½ A) وذلك بإزاحة إحدى الصفيحتين جانباً مع بقاء الشحنة ثابتة، نلاحظ ازدياد قراءة الفولطميتر إلى ضعف ما كانت عليه (2ΔV)، مما يؤدي إلى نقصان السعة.'
+                ],
+                conclusion: [
+                    'السعة (C) تقل بزيادة فرق الجهد (ΔV) مع ثبوت الشحنة (Q)، وفق العلاقة (C = Q / ΔV).',
+                    'السعة (C) تقل بنقصان المساحة المتقابلة للصفيحتين (A)، والعكس صحيح (C ∝ A) تناسب طردي.',
+                    'أي أن السعة (C) للمتسعة ذات الصفيحتين المتوازيتين تتناسب طردياً مع المساحة (A) المتقابلة للصفيحتين.'
+                ],
+                simType: 'cap_area'
+            },
+            {
+                id: 'ch1_3', chapter: 'ch1', chapterName: 'الفصل الأول: المتسعات', number: 'نشاط (3)',
+                ministry: 'سؤال عملي منهجي',
+                title: 'تغير مقدار سعة المتسعة (C) عند تغير البعد (d) بين الصفيحتين المتوازيتين',
+                question: 'وضح عملياً كيف يتغير مقدار سعة المتسعة (C) ذات الصفيحتين المتوازيتين عند تغير البعد (d) بين الصفيحتين المتوازيتين؟',
+                interactionHint: 'اسحب الصفيحة اليمنى يميناً ويساراً لتقريبها أو إبعادها وتغيير البعد (d) وراقب قراءة الفولطميتر.',
+                hasDrag: true,
+                tools: [
+                    'متسعة ذات الصفيحتين المتوازيتين مشحونة بشحنة (Q) ومفصولة عن مصدر الفولطية.',
+                    'جهاز فولطميتر وأسلاك توصيل.'
+                ],
+                steps: [
+                    'نربط طرفي الفولطميتر بين صفيحتي متسعة مشحونة بشحنة مقدارها (Q) ومفصولة عن مصدر الفولطية.',
+                    'عندما يكون البعد الابتدائي بين صفيحتي المتسعة هو (d)، تشير قراءة الفولطميتر إلى مقدار معين لفرق الجهد (ΔV).',
+                    'عند تقريب الصفيحتين من بعضهما البعض إلى البعد (½ d) مع بقاء مقدار الشحنة ثابتاً، نلاحظ أن قراءة الفولطميتر تقل إلى نصف ما كانت عليه (½ ΔV).'
+                ],
+                conclusion: [
+                    'السعة (C) تزداد عند نقصان فرق الجهد (ΔV) مع ثبوت الشحنة (Q)، وفق (C = Q / ΔV).',
+                    'سعة المتسعة (C) تزداد بنقصان البعد (d) بين الصفيحتين، والعكس صحيح (C ∝ 1/d) تناسب عكسي.',
+                    'أي أن السعة (C) لمتسعة تتناسب عكسياً مع البعد (d) بين الصفيحتين.'
+                ],
+                simType: 'cap_dist'
+            },
+            {
+                id: 'ch1_4', chapter: 'ch1', chapterName: 'الفصل الأول: المتسعات', number: 'نشاط (4)',
+                ministry: 'وزاري: د2 2015 • ت 2016 • د3خ 2016',
+                title: 'نشاط يوضح كيفية شحن المتسعة (مع رسم الدائرة والمخطط البياني لتيار الشحن)',
+                question: 'اذكر نشاطاً يوضح كيفية شحن المتسعة؟ مع رسم الدائرة الكهربائية اللازمة لإجراء هذا النشاط.',
+                interactionHint: 'اسحب ذراع المفتاح المزدوج (K) إلى الموقع (1) لشحن المتسعة، وراقب انحراف الكلفانوميتر وتوهج المصباح L₁ ومنحنى التيار.',
+                hasDrag: true,
+                tools: [
+                    'بطارية فولطيتها مناسبة.',
+                    'كلفانوميتر (G) صفره في وسط التدريجة.',
+                    'متسعة (C) ذات الصفيحتين المتوازيتين (A و B).',
+                    'مفتاح مزدوج (K)، مقاومة ثابتة (R)، مصباحان متماثلان (L₁ , L₂)، وأسلاك توصيل.'
+                ],
+                steps: [
+                    'نربط الدائرة الكهربائية كما في الشكل، بحيث نجعل المفتاح (K) في الموقع (1) وهذا يعني أن المتسعة مربوطة بالبطارية لغرض شحنها.',
+                    'نلاحظ انحراف مؤشر الكلفانوميتر (G) لحظياً إلى أحد جانبي صفر التدريجة (نحو اليمين مثلاً) ثم يعود بسرعة إلى الصفر مع ملاحظة توهج المصباح (L₁) بضوء ساطع لبرهة من الزمن ثم ينطفئ، وكأن البطارية غير مربوطة في الدائرة.',
+                    'سبب رجوع مؤشر الكلفانوميتر إلى الصفر هو بعد اكتمال عملية شحن المتسعة يتساوى جهد كل صفيحة مع جهد قطب البطارية المتصل بها، فينعدم فرق الجهد على طرفي المقاومة ويصبح التيار صفراً، وتُعد المتسعة في دائرة التيار المستمر مفتاحاً مفتوحاً.'
+                ],
+                conclusion: [
+                    'إن تياراً لحظياً قد انساب في الدائرة يُسمى تيار الشحن يبدأ بمقدار كبير لحظة إغلاق الدائرة (I = ΔV_battery / R) ويتناقص مقداره إلى الصفر بسرعة بعد اكتمال شحن المتسعة.'
+                ],
+                simType: 'cap_cd'
+            },
+            {
+                id: 'ch1_5', chapter: 'ch1', chapterName: 'الفصل الأول: المتسعات', number: 'نشاط (5)',
+                ministry: 'وزاري: د2 2013 • ت 2014 • د3 2015',
+                title: 'نشاط يوضح كيفية تفريغ المتسعة (مع رسم الدائرة والمخطط البياني لتيار التفريغ)',
+                question: 'اذكر نشاطاً يوضح كيفية تفريغ المتسعة؟ مع رسم الدائرة الكهربائية اللازمة لإجراء هذا النشاط.',
+                interactionHint: 'اسحب ذراع المفتاح (K) أولاً للموقع (1) للشحن ثم اسحبه للموقع (2) لتفريغ المتسعة وراقب انحراف المؤشر لليسار وتوهج L₂.',
+                hasDrag: true,
+                tools: [
+                    'بطارية فولطيتها مناسبة وكلفانوميتر (G) صفره في وسط التدريجة.',
+                    'متسعة (C) ذات الصفيحتين المتوازيتين (A و B).',
+                    'مفتاح مزدوج (K)، مقاومة ثابتة (R)، مصباحان متماثلان (L₁ , L₂)، وأسلاك توصيل.'
+                ],
+                steps: [
+                    'نربط الدائرة الكهربائية بحيث نجعل المفتاح (K) في الموقع (2)، وهذا يعني ربط صفيحتي المتسعة مع بعضهما بسلك موصل وبهذا تتم عملية تفريغ المتسعة من شحنتها (أي تعادل شحنة صفيحتيها).',
+                    'نلاحظ انحراف مؤشر الكلفانوميتر لحظياً إلى الجانب الآخر من صفر التدريجة (نحو اليسار) ثم يعود إلى الصفر بسرعة.',
+                    'نلاحظ توهج المصباح (L₂) بضوء ساطع لبرهة من الزمن ثم ينطفئ.'
+                ],
+                conclusion: [
+                    'إن تياراً لحظياً قد انساب في الدائرة الكهربائية يُسمى تيار التفريغ (I = ΔV_AB / R) ويتلاشى بسرعة ويساوي صفراً عندما لا يتوافر فرق جهد بين صفيحتي المتسعة أي عندما (ΔV_AB = 0V).'
+                ],
+                simType: 'cap_cd'
+            },
 
-    function renderExperiments() {
-      const container = document.getElementById('experimentsContainer');
-      const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
-      container.innerHTML = '';
+            // ================= الفصل الثاني: الحث الكهرومغناطيسي (6) =================
+            {
+                id: 'ch2_1', chapter: 'ch2', chapterName: 'الفصل الثاني: الحث الكهرومغناطيسي', number: 'نشاط (1)',
+                ministry: 'تجربة منهجية أساسية',
+                title: 'تجربة استعمال المجال المغناطيسي لتوليد تيار كهربائي (ساق مغناطيسية وملف وأميتر رقمي)',
+                question: 'اذكر تجربة توضح فيها استعمال المجال المغناطيسي لتوليد تيار كهربائي؟',
+                interactionHint: 'اسحب الساق المغناطيسية وحركها بسرعة نحو الملف أو بعيداً عنه، وراقب قراءة الأميتر الرقمي واتجاه التيار المحتث.',
+                hasDrag: true,
+                tools: [
+                    'ملف من سلك موصل مربوط بين طرفي أميتر رقمي.',
+                    'ساق مغناطيسية قطبها الشمالي مواجه لأحد وجهي الملف.'
+                ],
+                steps: [
+                    'عندما يكون الساق في حالة سكون نسبة للملف، نلاحظ أن قراءة الأميتر تساوي صفراً (0.00) لعدم تغير الفيض المغناطيسي (Φ_B) الذي يخترق الملف مع الزمن.',
+                    'عندما ندفع الساق المغناطيسية باليد نحو الملف بموازاة محوره بحيث القطب الشمالي مواجه لأحد وجهي الملف، نلاحظ انحراف مؤشر الأميتر باتجاه معين (+1.20) مشيراً إلى انسياب تيار بسبب تزايد الفيض المغناطيسي.',
+                    'عندما نُبعد الساق المغناطيسية عن الملف بالسرعة نفسها بموازاة محوره، نلاحظ انحراف قراءة الأميتر باتجاه معاكس (-1.20) بسبب تناقص الفيض المغناطيسي.'
+                ],
+                conclusion: [
+                    'ينساب تيار كهربائي في الدائرة يُسمى التيار المحتث (I_ind) فقط في حالة حصول تغير في الفيض المغناطيسي (ΔΦ_B) الذي يخترق الملف لوحدة الزمن.'
+                ],
+                simType: 'em_magnet_coil'
+            },
+            {
+                id: 'ch2_2', chapter: 'ch2', chapterName: 'الفصل الثاني: الحث الكهرومغناطيسي', number: 'نشاط (2)',
+                ministry: 'سؤال استنتاج فراداي الوزاري',
+                title: 'نشاط اكتشاف واستنتاج فراداي في الحث الكهرومغناطيسي (الحلقة الحديدية المقفلة)',
+                question: 'اشرح نشاطاً يوضح اكتشاف واستنتاج فراداي في الحث الكهرومغناطيسي؟ وماذا استنتج فراداي؟',
+                interactionHint: 'اسحب أو انقر ذراع المفتاح في دائرة الملف الابتدائي لإغلاقه وفتحه، وراقب انحراف الكلفانوميتر في الملف الثانوي.',
+                hasDrag: true,
+                tools: [
+                    'ملفان سلكيان ملفوفان حول حلقة مقفلة من الحديد المطاوع.',
+                    'بطارية ومفتاح كهربائي.',
+                    'كلفانوميتر صفره في وسط التدريجة.'
+                ],
+                steps: [
+                    'نربط أحد الملفين على التوالي مع بطارية ومفتاح وتسمى هذه الدائرة بـ (دائرة الملف الابتدائي).',
+                    'نربط الملف الآخر بين طرفي الكلفانوميتر وتسمى هذه الدائرة بـ (دائرة الملف الثانوي).',
+                    'نلاحظ لحظة إغلاق المفتاح المربوط مع الملف الابتدائي انحراف مؤشر المقياس المربوط مع الملف الثانوي في اتجاه معين ثم رجوعه إلى تدريجة الصفر (بسبب ثبوت التيار بعد الإغلاق وعدم تغير الفيض المغناطيسي).',
+                    'نلاحظ عند فتح المفتاح انحراف مؤشر المقياس ثانية ولكن إلى الجانب الآخر للصفر في هذه المرة ثم عودته إلى تدريجة الصفر.'
+                ],
+                conclusion: [
+                    'يتولد تيار محتث في دائرة كهربائية مقفلة (مثل ملف سلكي أو حلقة موصلة) فقط عندما يحصل تغير في الفيض المغناطيسي الذي يخترق تلك الدائرة لوحدة الزمن (ΔΦ_B / Δt).',
+                    'أعطى تفسيراً فيزيائياً لسبب فشل جميع المحاولات التي سبقت اكتشاف فراداي في توليد تيار كهربائي بواسطة مجال مغناطيسي لأن تلك المحاولات اعتمدت على المجالات المغناطيسية الثابتة فقط.'
+                ],
+                simType: 'faraday_ring'
+            },
+            {
+                id: 'ch2_3', chapter: 'ch2', chapterName: 'الفصل الثاني: الحث الكهرومغناطيسي', number: 'نشاط (3)',
+                ministry: 'وزاري: د2 2017',
+                title: 'نشاط يوضح ظاهرة الحث الكهرومغناطيسي (الحالات الثلاث: ساق، ملفان، مفتاح)',
+                question: 'وضح بنشاط ظاهرة الحث الكهرومغناطيسي ذاكراً الاستنتاج الذي توصلت إليه من خلال النشاط؟',
+                interactionHint: 'اختر إحدى الحالات الثلاث، ثم اسحب المغناطيس أو الملف الابتدائي لإدخاله في جوف الملف الثانوي أو افتح وأغلق المفتاح.',
+                hasDrag: true,
+                tools: [
+                    'ملفان سلكيان مجوفان مختلفان في أقطارهما (يمكن إدخال أحدهما في الآخر).',
+                    'كلفانوميتر صفره في الوسط، ساق مغناطيسية، أسلاك توصيل، بطارية، ومفتاح كهربائي.'
+                ],
+                steps: [
+                    'أولاً (ساق مغناطيسية وملف): نربط الملف الكبير مع الكلفانوميتر؛ عند سكون الساق لا ينحرف المؤشر، وعند تقريب الساق وإبعادها ينحرف المؤشر باتجاهين متعاكسين.',
+                    'ثانياً (ملفان ابتدائي وثانوي): نربط الملف الصغير بالبطارية ونحركه مقترباً ومبتعداً أمام وجه الملف الثانوي فينحرف المؤشر باتجاهين متعاكسين ويعود للصفر عند السكون.',
+                    'ثالثاً (ملفان ومفتاح): ندخل الملف الابتدائي في جوف الملف الثانوي ونحافظ على ثبوتهما، وعند إغلاق وفتح المفتاح يتذبذب مؤشر الكلفانوميتر على جانبي الصفر لحظتي الإغلاق والفتح فقط.'
+                ],
+                conclusion: [
+                    'تُستحث قوة دافعة كهربائية محتثة (ε_ind) وينساب تيار محتث (I_ind) في دائرة كهربائية مقفلة فقط عند حصول تغير في الفيض المغناطيسي الذي يخترق تلك الدائرة لوحدة الزمن، على الرغم من عدم توافر بطارية في تلك الدائرة.',
+                    'تكون قطبية القوة الدافعة الكهربائية المحتثة (ε_ind) واتجاه التيار المحتث (I_ind) باتجاه معين عند تزايد الفيض المغناطيسي، ويكونان باتجاه معاكس عند تناقص الفيض المغناطيسي.'
+                ],
+                simType: 'em_three_cases'
+            },
+            {
+                id: 'ch2_4', chapter: 'ch2', chapterName: 'الفصل الثاني: الحث الكهرومغناطيسي', number: 'نشاط (4)',
+                ministry: 'وزاري: د2 2013',
+                title: 'نشاط يوضح كيفية تقليل التيارات الدوامة في الموصلات (البندولان)',
+                question: 'وضح بنشاط كيفية تقليل التيارات الدوامة في الموصلات؟ وماذا تستنتج من هذا النشاط؟',
+                interactionHint: 'اسحب البندولين جانباً لإزاحتهما ثم أفلتهما ليهتزا بين قطبي المغناطيس، وراقب توقف الصفيحة الكاملة واستمرار المقطعة!',
+                hasDrag: true,
+                tools: [
+                    'بندولان متماثلان كل منهما بشكل صفيحة من الألمنيوم مثبتة بطرف ساق خفيفة؛ إحداهما مقطعة بشكل شرائح معزولة مثل أسنان المشط والأخرى كاملة.',
+                    'مغناطيس دائم قوي (كثافة فيضه عالية) وحامل.'
+                ],
+                steps: [
+                    'نزيح الصفيحتين بإزاحة متساوية إلى أحد جانبي موقع استقرارهما.',
+                    'نترك الصفيحتين في آن واحد لتهتز كل منهما بحرية بين قطبي المغناطيس.',
+                    'نجد أن البندول ذا الصفيحة الكاملة (غير المقطعة) يتوقف عن الحركة أثناء مروره خلال الفجوة بين القطبين المغناطيسيين، في حين الصفيحة المقطعة بشكل أسنان المشط تمر وتستمر بالاهتزاز ذهاباً وإياباً بتباطؤ قليل.'
+                ],
+                conclusion: [
+                    'تتولد تيارات دوامة كبيرة المقدار في الصفيحة غير المقطعة أثناء دخولها وخروجها من المجال المغناطيسي نتيجة تغير الفيض (ΔΦ_B / Δt) وفق قانون فراداي، فتتولد قوة مغناطيسية معرقلة (F_B) وفق قانون لنز فتتلاشى سعة اهتزاز الصفيحة وتتوقف.',
+                    'أما التيارات الدوامة المتولدة في الصفيحة المقطعة بشكل شرائح فتكون صغيرة المقدار جداً فيكون تأثيرها في اهتزاز الصفيحة ضعيفاً جداً.'
+                ],
+                simType: 'eddy_pendulum'
+            },
+            {
+                id: 'ch2_5', chapter: 'ch2', chapterName: 'الفصل الثاني: الحث الكهرومغناطيسي', number: 'نشاط (5)',
+                ministry: 'مهم جداً في المنهج',
+                title: 'تجربة توضح تأثير المحاثة للملف (تأخر توهج المصباح المربوط مع الملف)',
+                question: 'اشرح تجربة توضح تأثير المحاثة للملف؟',
+                interactionHint: 'أغلق المفتاح الكهربائي وراقب الفرق الزمني بين توهج مصباح المقاومة (R) وتأخر توهج مصباح الملف (L).',
+                hasDrag: false,
+                tools: [
+                    'مصباحان متماثلان وبطارية.',
+                    'مقاومة متغيرة (R).',
+                    'ملف في جوفه قلب من الحديد المطاوع مقاومته تساوي المقاومة المتغيرة (R).',
+                    'مفتاح وأسلاك توصيل.'
+                ],
+                steps: [
+                    'نربط المصباحين المتماثلين على التوازي مع البطارية، ثم نربط المقاومة المتغيرة (R) على التوالي مع أحد المصباحين، ونربط الملف ذا القلب الحديدي (الذي مقاومته تساوي R) على التوالي مع المصباح الآخر.',
+                    'عندما نغلق المفتاح في الدائرة، نلاحظ أن كلا المصباحين يتوهجان توهجاً متساوياً في الشدة بعد وصول التيار مقداره الثابت، ولكن لا يصلان ذلك في آن واحد بل هنالك تأخر ملحوظ في الزمن اللازم لتوهج المصباح المربوط على التوالي مع الملف توهجاً كاملاً.'
+                ],
+                conclusion: [
+                    'إن سبب هذا التباطؤ في توهج المصباح المربوط على التوالي مع الملف يُعزى إلى الحث الذاتي الذي يمتلكه الملف والتي تُسمى تأثير المحاثة للملف.'
+                ],
+                simType: 'inductance_lamps'
+            },
+            {
+                id: 'ch2_6', chapter: 'ch2', chapterName: 'الفصل الثاني: الحث الكهرومغناطيسي', number: 'نشاط (6)',
+                ministry: 'وزاري: ت 2015 • د1 خارج 2016',
+                title: 'نشاط يوضح تولد القوة الدافعة الكهربائية الذاتية (ε_ind) على طرفي الملف (مصباح النيون)',
+                question: 'اشرح نشاطاً يوضح تولد القوة الدافعة الكهربائية الذاتية على طرفي الملف (تجربة مصباح النيون)؟',
+                interactionHint: 'اسحب/انقر المفتاح لإغلاق الدائرة (9V لا تكفي)، ثم اسحبه لفتح الدائرة فجأة وشاهد توهج مصباح النيون (80V) بضوء ساطع!',
+                hasDrag: true,
+                tools: [
+                    'بطارية ذات فولطية (9V) ومفتاح كهربائي.',
+                    'ملف سلكي في جوفه قلب من الحديد المطاوع.',
+                    'مصباح نيون يحتاج (80V) ليتوهج.'
+                ],
+                steps: [
+                    'نربط الملف والمفتاح والبطارية على التوالي مع بعض.',
+                    'نربط مصباح النيون على التوازي مع الملف.',
+                    'نغلق دائرة الملف والبطارية بوساطة المفتاح؛ لا نلاحظ توهج المصباح.',
+                    'نفتح دائرة الملف والبطارية بوساطة المفتاح؛ نلاحظ توهج مصباح النيون بضوء ساطع لبرهة قصيرة من الزمن على الرغم من فصل البطارية عن الدائرة.'
+                ],
+                conclusion: [
+                    'أولاً: عدم توهج مصباح النيون لحظة إغلاق المفتاح كان بسبب الفولطية الموضوعة على طرفيه لم تكن كافية لتوهجه، لأن نمو التيار من الصفر إلى مقداره الثابت يكون بطيئاً نتيجة لتولد قوة دافعة كهربائية محتثة في الملف تعرقل المسبب لها وفق قانون لنز.',
+                    'ثانياً: توهج مصباح النيون لحظة فتح المفتاح كان بسبب تولد فولطية كبيرة على طرفيه تكفي لتوهجه نتيجة التلاشي السريع للتيار خلال الملف، فتتولد قوة دافعة كهربائية محتثة ذاتية كبيرة المقدار فيعمل الملف كمصدر طاقة يجهز المصباح بفولطية تكفي لتوهجه.'
+                ],
+                simType: 'neon_inductor'
+            },
 
-      const filteredData = data.filter(item => {
-        const matchesChapter = (currentChapter === 'all' || item.chapter === currentChapter);
-        const matchesSearch = item.title.toLowerCase().includes(searchVal) ||
-                              item.tools.some(t => t.toLowerCase().includes(searchVal)) ||
-                              item.chapterName.toLowerCase().includes(searchVal);
-        return matchesChapter && matchesSearch;
-      });
+            // ================= الفصل الثالث: التيار المتناوب (4) =================
+            {
+                id: 'ch3_1', chapter: 'ch3', chapterName: 'الفصل الثالث: التيار المتناوب', number: 'نشاط (1)',
+                ministry: 'وزاري: د1/خ1 2014 • د3 2015 • ت 2017',
+                title: 'تأثير تغير تردد تيار الدائرة (f) في مقدار رادة الحث (X_L)',
+                question: 'وضح بنشاط تأثير تغير تردد تيار الدائرة (f) في مقدار رادة الحث (X_L)؟ ثم ارسم الدائرة الكهربائية والمخطط البياني.',
+                interactionHint: 'غير تردد المذبذب الكهربائي (f) تدريجياً مع ثبوت الفولطية، وراقب نقصان قراءة الأميتر وارتفاع خط العلاقة الطردية.',
+                hasDrag: false,
+                tools: [
+                    'مذبذب كهربائي (مصدر فولطية متناوبة يمكن تغيير تردده).',
+                    'أميتر وفولطميتر، ملف مهمل المقاومة (محث)، ومفتاح كهربائي.'
+                ],
+                steps: [
+                    'نربط دائرة كهربائية عملية تتألف من الملف والأميتر والمذبذب الكهربائي على التوالي، ونربط الفولطميتر على التوازي بين طرفي الملف.',
+                    'نغلق الدائرة ونبدأ بزيادة تردد المذبذب الكهربائي تدريجياً مع المحافظة على بقاء مقدار الفولطية ثابتاً (بمراقبة قراءة الفولطميتر).',
+                    'نلاحظ حصول نقصان في قراءة الأميتر في الدائرة بسبب ازدياد مقدار رادة الحث.'
+                ],
+                conclusion: [
+                    'نستنتج من النشاط أن رادة الحث (X_L) تتناسب طردياً مع تردد التيار (f) بثبوت معامل الحث الذاتي (L).'
+                ],
+                simType: 'ac_xl_f'
+            },
+            {
+                id: 'ch3_2', chapter: 'ch3', chapterName: 'الفصل الثالث: التيار المتناوب', number: 'نشاط (2)',
+                ministry: 'وزاري: ت 2014 • د1/ن 2015',
+                title: 'تأثير تغير معامل الحث الذاتي (L) في مقدار رادة الحث (X_L)',
+                question: 'وضح بنشاط تأثير تغير معامل الحث الذاتي (L) في مقدار رادة الحث (X_L)؟ ثم ارسم الدائرة الكهربائية والمخطط البياني.',
+                interactionHint: 'اسحب قلب الحديد المطاوع بالماوس أو اللمس وأدخله تدريجياً في جوف الملف المجوف، وراقب زيادة X_L ونقصان قراءة الأميتر.',
+                hasDrag: true,
+                tools: [
+                    'مصدر فولطية متناوبة تردده ثابت.',
+                    'قلب من الحديد المطاوع.',
+                    'أميتر وفولطميتر، ملف مجوف مهمل المقاومة (محث)، ومفتاح كهربائي.'
+                ],
+                steps: [
+                    'نربط دائرة كهربائية عملية تتألف من الملف والأميتر ومصدر الفولطية على التوالي، ونربط الفولطميتر على التوازي بين طرفي الملف.',
+                    'نغلق الدائرة ونلاحظ قراءة الأميتر.',
+                    'ندخل قلب الحديد تدريجياً في جوف الملف مع المحافظة على بقاء مقدار الفولطية بين طرفي الملف ثابتاً؛ نلاحظ حصول نقصان في قراءة الأميتر بسبب ازدياد مقدار رادة الحث لأن إدخال قلب الحديد يزيد من معامل الحث الذاتي للملف.'
+                ],
+                conclusion: [
+                    'نستنتج من النشاط أن رادة الحث (X_L) تتناسب طردياً مع معامل الحث الذاتي (L) بثبوت تردد التيار (f).'
+                ],
+                simType: 'ac_xl_l'
+            },
+            {
+                id: 'ch3_3', chapter: 'ch3', chapterName: 'الفصل الثالث: التيار المتناوب', number: 'نشاط (3)',
+                ministry: 'وزاري: د2 2013 • د3 2015 • ت 2016 • ت 2017',
+                title: 'تأثير تغير مقدار تردد فولطية المصدر (f) في مقدار رادة السعة (X_C)',
+                question: 'وضح بنشاط تأثير تغير مقدار تردد فولطية المصدر (f) في مقدار رادة السعة (X_C)؟ ثم ارسم الدائرة الكهربائية والمخطط البياني.',
+                interactionHint: 'غير تردد المذبذب الكهربائي (f) تدريجياً وراقب ازدياد قراءة الأميتر ونقصان رادة السعة (X_C) على المنحنى العكسي.',
+                hasDrag: false,
+                tools: [
+                    'أميتر وفولطميتر، متسعة ذات الصفيحتين المتوازيتين.',
+                    'مذبذب كهربائي، أسلاك توصيل، ومفتاح كهربائي.'
+                ],
+                steps: [
+                    'نربط دائرة كهربائية عملية تتألف من المتسعة والأميتر والمذبذب الكهربائي على التوالي، ونربط الفولطميتر على التوازي بين صفيحتي المتسعة.',
+                    'نغلق الدائرة ونبدأ بزيادة تردد المذبذب الكهربائي مع المحافظة على بقاء مقدار فرق الجهد بين صفيحتي المتسعة ثابتاً.',
+                    'نلاحظ ازدياد قراءة الأميتر (ازدياد التيار المنساب في الدائرة) مع ازدياد تردد فولطية المصدر.'
+                ],
+                conclusion: [
+                    'نستنتج من النشاط أن رادة السعة (X_C) تتناسب عكسياً مع تردد فولطية المصدر (f) بثبوت سعة المتسعة (C).'
+                ],
+                simType: 'ac_xc_f'
+            },
+            {
+                id: 'ch3_4', chapter: 'ch3', chapterName: 'الفصل الثالث: التيار المتناوب', number: 'نشاط (4)',
+                ministry: 'وزاري: د2خ 2014',
+                title: 'تأثير تغير سعة المتسعة (C) في مقدار رادة السعة (X_C)',
+                question: 'وضح بنشاط تأثير تغير سعة المتسعة (C) في مقدار رادة السعة (X_C)؟ ثم ارسم الدائرة الكهربائية والمخطط البياني.',
+                interactionHint: 'اسحب لوح المادة العازلة وأدخله بين صفيحتي المتسعة لزيادة سعتها (C) تدريجياً، وراقب ازدياد قراءة الأميتر.',
+                hasDrag: true,
+                tools: [
+                    'مصدر للفولطية المتناوبة تردده ثابت.',
+                    'أميتر وفولطميتر، متسعة ذات الصفيحتين المتوازيتين متغيرة السعة (أو لوح عازل)، ومفتاح كهربائي.'
+                ],
+                steps: [
+                    'نربط دائرة كهربائية عملية تتألف من المتسعة والأميتر ومصدر الفولطية على التوالي، ونربط الفولطميتر على التوازي بين صفيحتي المتسعة.',
+                    'نغلق الدائرة ونلاحظ قراءة الأميتر.',
+                    'نزيد مقدار سعة المتسعة تدريجياً (وذلك بإدخال لوح من مادة عازلة كهربائياً بين صفيحتي المتسعة)؛ نلاحظ ازدياد قراءة الأميتر زيادة طردية مع ازدياد سعة المتسعة.'
+                ],
+                conclusion: [
+                    'نستنتج من النشاط أن رادة السعة (X_C) تتناسب عكسياً مع مقدار سعة المتسعة (C) بثبوت تردد فولطية المصدر (f).'
+                ],
+                simType: 'ac_xc_c'
+            },
 
-      if (filteredData.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding: 30px; color: #777;">لا توجد أنشطة تطابق البحث.</div>';
-        return;
-      }
+            // ================= الفصل الرابع: الموجات الكهرومغناطيسية (3) =================
+            {
+                id: 'ch4_1', chapter: 'ch4', chapterName: 'الفصل الرابع: الموجات الكهرومغناطيسية', number: 'نشاط (1)',
+                ministry: 'مهم جداً في المنهج',
+                title: 'الكشف عن الموجة الكهرومغناطيسية بوساطة مجالها الكهربائي (الهوائي السلكي)',
+                question: 'وضح كيف يتم الكشف عن الموجة الكهرومغناطيسية بوساطة مجالها الكهربائي؟',
+                interactionHint: 'غيّر سعة المتسعة المتغيرة (C) في دائرة الرنين لمطابقة تردد الموجة المستلمة (100 MHz) وشاهد اهتزاز الشحنات في الهوائي.',
+                hasDrag: false,
+                tools: [
+                    'هوائي سلكي مستقيم ومستقبل أرضي.',
+                    'دائرة رنين (ملف L ومتسعة متغيرة السعة C).',
+                    'مقاومة R ومرحلة تكبير راديوي (RF amplifier).'
+                ],
+                steps: [
+                    'نربط الدائرة الكهربائية بحيث يقترن الهوائي بدائرة الرنين بالحث المتبادل.',
+                    'المجال الكهربائي للموجة (E_y) يعمل على جعل الشحنات تهتز في الهوائي؛ فعندما يتذبذب (E_y) بين الموجب والسالب تنعكس قطبية الهوائي بين الموجب والسالب.',
+                    'تتحرك الشحنة في الهوائي إلى أعلى وإلى أسفل الهوائي فيتولد تيار محتث فيه، يولد جهداً متغيراً في الدائرة الرنينية المرتبطة بالهوائي بوساطة الحث المتبادل.',
+                    'التوليف يكون مع الإشارة المستلمة في الهوائي عن طريق دائرة الرنين بوساطة تغيير سعة المتسعة الموجودة في الدائرة.'
+                ],
+                conclusion: [
+                    'يتم الكشف عن الموجة الكهرومغناطيسية بوساطة مجالها الكهربائي (E_y) من خلال جعل الشحنات تهتز في الهوائي وتوليد تيار محتث ينتقل بالحث المتبادل إلى دائرة الرنين التي تُولَّف بتغيير سعة المتسعة (C).'
+                ],
+                simType: 'em_detect_e'
+            },
+            {
+                id: 'ch4_2', chapter: 'ch4', chapterName: 'الفصل الرابع: الموجات الكهرومغناطيسية', number: 'نشاط (2)',
+                ministry: 'وزاري: د1/ن 2015 • د2 2016',
+                title: 'الكشف عن الموجة الكهرومغناطيسية بوساطة مجالها المغناطيسي (الهوائي الحلقي)',
+                question: 'وضح كيف يتم الكشف عن الموجة الكهرومغناطيسية بوساطة مجالها المغناطيسي؟ مع رسم مخطط يمثل الجهاز.',
+                interactionHint: 'اسحب/دوّر مستوى حلقة الهوائي ليصبح عمودياً على اتجاه الفيض المغناطيسي وولّف السعة للحصول على أعظم إشارة.',
+                hasDrag: true,
+                tools: [
+                    'هوائي عبارة عن سلك حلقي موصل.',
+                    'دائرة رنين (ملف L ومتسعة متغيرة السعة C) ومكبر راديوي.'
+                ],
+                steps: [
+                    'الهوائي في هذه الدائرة عبارة عن سلك حلقي موصل يُربط مع دائرة الرنين.',
+                    'تتولد قوة دافعة كهربائية محتثة (emf_ind) في حلقة الهوائي لكون المجال المغناطيسي للموجة الكهرومغناطيسية متغيراً مع الزمن.',
+                    'نجعل مستوى حلقة الهوائي بوضع عمودي على اتجاه الفيض المغناطيسي؛ لهذا السبب نجد أن أجهزة الراديو الصغيرة يختلف استقبالها لمحطات الإذاعة تبعاً لاتجاهها.',
+                    'التوليف يكون مع الإشارة المستلمة في الهوائي عن طريق دائرة الرنين بوساطة تغيير سعة المتسعة الموجودة في الدائرة.'
+                ],
+                conclusion: [
+                    'يتم الكشف عن الموجة الكهرومغناطيسية بوساطة مجالها المغناطيسي المتغير باستخدام هوائي حلقي يكون مستواه عمودياً على اتجاه الفيض المغناطيسي، مع التوليف بتغيير سعة المتسعة (C).'
+                ],
+                simType: 'em_detect_b'
+            },
+            {
+                id: 'ch4_3', chapter: 'ch4', chapterName: 'الفصل الرابع: الموجات الكهرومغناطيسية', number: 'نشاط (3)',
+                ministry: 'تجربة العالم هنري هرتز 1887م',
+                title: 'توليد واستقبال الموجات الكهرومغناطيسية (تجربة هرتز)',
+                question: 'من أول من قام بتوليد (استقبال) الموجات الكهرومغناطيسية؟ وكيف استطاع توليدها؟ (تجربة هرتز)',
+                interactionHint: 'اسحب/دوّر حلقة الاستقبال لتكون موازية لخط قطبي المرسل، ثم أطلق شرارة ملف الحث وشاهد تولد شرارة لاسلكية في المستقبل!',
+                hasDrag: true,
+                tools: [
+                    'دائرة إرسال: ملف حث وكرتان معدنيتان بينهما فجوة شرارة.',
+                    'دائرة استقبال: حلقة معدنية مفتوحة توجد فجوة بين نهايتيها بدون أسلاك توصيل.'
+                ],
+                steps: [
+                    'أول من تمكن من توليد الموجات الكهرومغناطيسية العالم الألماني هنري هرتز في عام 1887.',
+                    'دائرة الإرسال: يتم فيها إحداث شرارة كهربائية بين قطبي الملف الثانوي لجهاز ملف الحث عند توافر انحدار جهد (مجال كهربائي) كافٍ بينهما.',
+                    'دائرة الاستقبال: تتألف من حلقة معدنية مفتوحة توجد فجوة بين نهايتيها يتم عن طريقها استقبال الموجات بشرط أن تكون الحلقة ذات قطر محدد وموضوعة في وضع يكون فيه الخط الفاصل بين طرفي فتحتها يوازي الخط الواصل بين القطبين اللذين يولدان الشرارة.'
+                ],
+                conclusion: [
+                    'لاحظ هرتز تولد شرارة في دائرة الاستقبال عند وضع معين (التوازي) من غير وجود أسلاك توصيل بين المرسل والمستقبل.'
+                ],
+                simType: 'hertz_exp'
+            },
 
-      filteredData.forEach(exp => {
-        const card = document.createElement('div');
-        card.className = 'experiment-card';
+            // ================= الفصل الخامس: البصريات الفيزيائية (6) =================
+            {
+                id: 'ch5_1', chapter: 'ch5', chapterName: 'الفصل الخامس: البصريات الفيزيائية', number: 'نشاط (1)',
+                ministry: 'نشاط منهجي أساسي',
+                title: 'نشاط يوضح مفهوم تداخل الموجات (حوض المويجات: التداخل البناء والإتلافي)',
+                question: 'اشرح نشاطاً يوضح مفهوم تداخل الموجات؟',
+                interactionHint: 'شغّل الهزاز في حوض المويجات وبدّل بين التداخل البناء (طور واحد) والتداخل الإتلافي (طوران متعاكسان) وشاهد الموجات الحية.',
+                hasDrag: false,
+                tools: [
+                    'جهاز حوض المويجات، مجهز قدرة، وهزاز.',
+                    'نقار ذو رأسين مدببين بمثابة مصدرين نقطيين (S₁ , S₂) يبعثان موجات دائرية تنتشر على سطح الماء بالطول الموجي نفسه.'
+                ],
+                steps: [
+                    'نُعد جهاز حوض المويجات للعمل، ثم نجعل طرفي النقار يمسان سطح الماء في الحوض.',
+                    'عند تشغيل الهزاز نشاهد طراز التداخل عند سطح الماء نتيجة تراكب الموجات الناتجة عن اهتزاز المصدرين النقطيين المتماثلين (S₁ , S₂).'
+                ],
+                conclusion: [
+                    'يتضح من مشاهدتنا للتداخل الحاصل للموجات عند سطح الماء وجود نوعين من التداخل هما:',
+                    '1. تداخل بنّاء: ناتج من اتحاد موجتين لهما نفس السعة والطور عند نقطة معينة لتقوي إحداهما الأخرى فتكون سعة الموجة الناتجة مساوية لضعف سعة أي من الموجتين الأصليتين (تراكب قمتين أو قعرين).',
+                    '2. تداخل إتلافي: ناتج من اتحاد موجتين لهما نفس السعة ومتعاكستين بالطور عند نقطة معينة فيمحو تأثير إحداهما الآخر وتكون سعة الموجة الناتجة تساوي صفراً (تراكب قمة مع قعر).'
+                ],
+                simType: 'wave_interference'
+            },
+            {
+                id: 'ch5_2', chapter: 'ch5', chapterName: 'الفصل الخامس: البصريات الفيزيائية', number: 'نشاط (2)',
+                ministry: 'وزاري: د2 2016',
+                title: 'تجربة شقي يونك وكيفية حساب الطول الموجي للضوء المستعمل',
+                question: 'اشرح نشاطاً توضح فيه تجربة شقي يونك؟ مبيناً كيفية حساب الطول الموجي للضوء المستعمل.',
+                interactionHint: 'غيّر الطول الموجي للضوء (λ) والبعد بين الشقين (d) وشاهد أهداب التداخل المضيئة والمظلمة على الشاشة.',
+                hasDrag: false,
+                tools: [
+                    'حاجز ذو شق ضيق يضاء بضوء أحادي اللون.',
+                    'حاجز يحتوي على شقين متماثلين ضيقين (الشق المزدوج) يقعان على بعدين متساويين عن شق الحاجز الأول.',
+                    'شاشة بيضاء توضع على بعد بضعة أمتار (L).'
+                ],
+                steps: [
+                    'استعمل يونك حاجزاً ذا شق ضيق أُضيء بضوء أحادي اللون.',
+                    'يسقط الضوء على حاجز يحتوي على شقين متماثلين ضيقين يسميان بالشق المزدوج يقعان على بعدين متساويين عن شق الحاجز الأول.',
+                    'وضع على بعد بضعة أمتار منهما شاشة لاستقبال أهداب التداخل.'
+                ],
+                conclusion: [
+                    'ظهور مناطق مضيئة ومناطق مظلمة على التعاقب تُسمى بأهداب التداخل.',
+                    'ولحساب الطول الموجي للضوء المستعمل نطبق العلاقة: λ = (y_m · d) / (m · L).'
+                ],
+                simType: 'young_slits'
+            },
+            {
+                id: 'ch5_3', chapter: 'ch5', chapterName: 'الفصل الخامس: البصريات الفيزيائية', number: 'نشاط (3)',
+                ministry: 'وزاري: ت 2013 • د1 خارج 2015 • د2 2015',
+                title: 'نشاط يوضح ظاهرة حيود الضوء (لوح الزجاج المطلي بالدهان الأسود)',
+                question: 'اشرح نشاطاً توضح فيه ظاهرة حيود الضوء؟',
+                interactionHint: 'اسحب الدبوس على لوح الزجاج المطلي بالأسود لعمل شق رفيع جداً وشاهد نمط الحيود والهدب المركزي العريض!',
+                hasDrag: true,
+                tools: [
+                    'لوح زجاج، دبوس، دهان أسود، ومصدر ضوئي أحادي اللون.'
+                ],
+                steps: [
+                    'ادهن لوح الزجاج بالدهان الأسود.',
+                    'اعمل شقاً رفيعاً في لوح الزجاج باستعمال رأس الدبوس.',
+                    'انظر من خلال الشق إلى المصدر الضوئي؛ ستلاحظ مناطق مضيئة تتخللها مناطق معتمة وأن المنطقة الوسطى عريضة وشديدة الإضاءة وأن الهدب المضيئة تقل شدتها ويتناقص عرضها بالتدريج عند الابتعاد عن الهداب المركزي المضيء.'
+                ],
+                conclusion: [
+                    'نستنتج ظهور مناطق مضيئة ومظلمة على جانبي الفتحة تدل على أن الضوء يحيد عن مساره.'
+                ],
+                simType: 'light_diffraction'
+            },
+            {
+                id: 'ch5_4', chapter: 'ch5', chapterName: 'الفصل الخامس: البصريات الفيزيائية', number: 'نشاط (4)',
+                ministry: 'وزاري: د2 2014',
+                title: 'نشاط يوضح استقطاب الموجات الضوئية (شريحتا التورمالين)',
+                question: 'اشرح نشاطاً توضح فيه استقطاب الموجات الضوئية مع الاستنتاج؟',
+                interactionHint: 'اسحب قرص المحلل (شريحة التورمالين الثانية) لتدويره بزاوية (θ) وشاهد تغير شدة الضوء المستقطب النافذ.',
+                hasDrag: true,
+                tools: [
+                    'شريحتان من التورمالين ومصدر ضوئي.'
+                ],
+                steps: [
+                    'نأخذ شريحة من التورمالين ونضعها في طريق مصدر الضوء، ونقوم بتدويرها حول المحور المار من وسطها والعمودي عليها؛ نلاحظ عدم تغير مقدار الضوء النافذ.',
+                    'نضع شريحتين من التورمالين؛ نثبت إحدى الشريحتين (المستقطب) وندور الشريحة الأخرى (المحلل) ببطء حول الحزمة الضوئية ونلاحظ تغير شدة الإضاءة النافذة عند تدوير الشريحة الثانية.'
+                ],
+                conclusion: [
+                    'الضوء غير المستقطب هو موجات مستعرضة يهتز مجالها الكهربائي في الاتجاهات جميعها، وبلورة التورمالين تترتب فيها الجزيئات بشكل سلسلة طويلة إذ لا تسمح بمرور الموجات الضوئية إلا إذا كان مستوي اهتزاز مجالها الكهربائي عمودياً على خط السلسلة بينما تمتص باقي الموجات وهذه العملية تسمى الاستقطاب.',
+                    'في الضوء المستقطب يكون تذبذب المجال الكهربائي باتجاه واحد، وتسمى الشريحة الأولى بالمستقطب (Polarizer) والثانية بالمحلل (Analyzer).'
+                ],
+                simType: 'polarization_tourmaline'
+            },
+            {
+                id: 'ch5_5', chapter: 'ch5', chapterName: 'الفصل الخامس: البصريات الفيزيائية', number: 'نشاط (5)',
+                ministry: 'وزاري: د1 خارج 2013 • د2 خارج 2016',
+                title: 'تأثير المادة المستقطبة في شدة الضوء النافذ من خلالها (تدوير اللوح المحلل حتى الانعدام)',
+                question: 'اشرح نشاطاً توضح فيه تأثير المادة المستقطبة في شدة الضوء النافذ من خلالها؟',
+                interactionHint: 'اسحب/دوّر اللوح المحلل حتى زاوية 90° وشاهد اختفاء شدة الضوء تماماً عند التعامد!',
+                hasDrag: true,
+                tools: [
+                    'مصدر ضوئي أحادي اللون، وشريحتان من مادة التورمالين.'
+                ],
+                steps: [
+                    'نضع المصدر الضوئي أمام اللوح المستقطب ثم نضع اللوح الثاني المحلل خلفه؛ سنلاحظ تناقص شدة الضوء النافذ خلال اللوحين.',
+                    'نقوم بتدوير اللوح المحلل حتى تنعدم شدة الضوء تماماً.'
+                ],
+                conclusion: [
+                    'إن الضوء الاعتيادي النافذ من خلال اللوح المستقطب قد استُقطب استوائياً وقلت شدته، وعند نفوذه من اللوح المحلل قلت شدته أكثر.',
+                    'عند تدوير اللوح المحلل وعند وضع معين له سنلاحظ أن شدة الضوء تختفي تماماً عند النظر من خلاله وهذا يدل على أن الضوء المستقطب قد حجبه المحلل بالكامل.'
+                ],
+                simType: 'polarization_tourmaline'
+            },
+            {
+                id: 'ch5_6', chapter: 'ch5', chapterName: 'الفصل الخامس: البصريات الفيزيائية', number: 'نشاط (6)',
+                ministry: 'تجربة تماثلية منهجية',
+                title: 'تجربة توضح استقطاب الموجات الميكانيكية (الحبل والحاجز ذو الشق)',
+                question: 'اشرح تجربة (نشاطاً) توضح استقطاب الموجات الميكانيكية؟',
+                interactionHint: 'اسحب الحاجز ذو الشق لتدويره بين الوضع العمودي (يمرر الموجة) والوضع الأفقي (يحجب موجة الحبل المستعرضة).',
+                hasDrag: true,
+                tools: [
+                    'حبل مثبت من أحد طرفيه بجدار، وحاجز ذو شق.'
+                ],
+                steps: [
+                    'نمرر الطرف السائب من الحبل عبر شق الحاجز، ونجعل الشق طولياً نحو الأعلى وعمودياً مع الحبل.',
+                    'نشد الحبل ثم ننتره لتوليد موجة مستعرضة منتقلة فيه؛ نشاهد أن الموجة المستعرضة قد مرت من خلال الشق (a).',
+                    'نجعل الشق بوضع أفقي ثم نشد الحبل وننتره؛ نشاهد أن الموجة المستعرضة المتولدة في الحبل لا يمكنها المرور من خلال الشق (b).'
+                ],
+                conclusion: [
+                    'يمكن التوصل إلى النتيجة نفسها مع موجات الضوء، إذا استعملنا شريحة من التورمالين وهي مادة شفافة تسمح بمرور موجات الضوء الذي يكون تذبذب مجاله الكهربائي بالاتجاه العمودي وتحجب موجات الضوء الذي يكون تذبذب مجاله الكهربائي بالاتجاه الأفقي وذلك بامتصاصها داخلياً.'
+                ],
+                simType: 'rope_polarization'
+            },
 
-        const toolsList = exp.tools.map(t => `<li>${t}</li>`).join('');
-        const stepsList = exp.steps.map(s => `<li>${s}</li>`).join('');
+            // ================= الفصل السادس: الفيزياء الحديثة (1) =================
+            {
+                id: 'ch6_1', chapter: 'ch6', chapterName: 'الفصل السادس: الفيزياء الحديثة', number: 'نشاط (1)',
+                ministry: 'وزاري: ت 2013 • 2014 • 2015',
+                title: 'نشاط لدراسة الظاهرة الكهروضوئية (وتأثير شدة الضوء وعكس القطبية وجهد الإيقاف)',
+                question: 'اشرح نشاطاً (تجربة) لدراسة الظاهرة الكهروضوئية؟ موضحاً تأثير زيادة شدة الضوء وعكس القطبية وجهد الإيقاف.',
+                interactionHint: 'تحكم بشدة الضوء الساقط وفرق الجهد (الموجب والسالب) وشاهد حركة الإلكترونات الضوئية من الباعث E إلى الجامع C وتوقفها عند جهد الإيقاف -Vs.',
+                hasDrag: false,
+                tools: [
+                    'خلية كهروضوئية، فولطميتر (V)، أميتر (A).',
+                    'مصدر فولطية مستمرة يمكن تغيير جهده، أسلاك توصيل، ومصدر ضوئي.'
+                ],
+                steps: [
+                    'نربط الدائرة الكهربائية للخلية الكهروضوئية بحيث يتصل اللوح الباعث (E) بالسالب واللوح الجامع (C) بالموجب.',
+                    'عند وضع الأنبوبة بالظلام نلاحظ أن قراءة الأميتر تساوي صفراً (لا يمر تيار).',
+                    'عند إضاءة اللوح الباعث بضوء ذي تردد مؤثر نلاحظ انحراف مؤشر الأميتر دلالة على انبعاث الإلكترونات الضوئية من الباعث واستقبالها في الجامع.',
+                    'عند زيادة الجهد الموجب للوح الجامع يزداد التيار الكهروضوئي حتى يصل إلى مقداره الأعظم الثابت ويُسمى (تيار الإشباع).'
+                ],
+                conclusion: [
+                    '1. يزداد تيار الإشباع عند زيادة شدة الضوء الساقط لتردد معين مؤثر (ويتضاعف تيار الإشباع عند مضاعفة شدة الضوء).',
+                    '2. في حالة عكس قطبية فولطية المصدر (الجامع سالب والباعث موجب) يهبط التيار تدريجياً لأن معظم الإلكترونات الضوئية تتنافر مع اللوح الجامع السالب وتصل فقط الإلكترونات التي طاقتها أكبر من (e·ΔV).',
+                    '3. عند زيادة سالبية جهد اللوح الجامع تدريجياً إلى قيمة معينة (-V_s) يُسمى جهد الإيقاف أو جهد القطع يصبح تيار الدائرة يساوي صفراً، ونلاحظ أن جهد الإيقاف لا يعتمد على شدة الضوء الساقط.'
+                ],
+                simType: 'photoelectric'
+            },
 
-        card.innerHTML = `
-          <div class="card-header">
-            <h2 class="card-title">${exp.title}</h2>
-            <span class="chapter-tag">${exp.chapterName}</span>
-          </div>
-          <div class="section-title">أدوات النشاط:</div>
-          <ul>${toolsList}</ul>
-          <div class="section-title">خطوات النشاط:</div>
-          <ol>${stepsList}</ol>
-          <div class="conclusion">
-            <strong>الاستنتاج: </strong>${exp.conclusion}
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
+            // ================= الفصل الثامن: الأطياف الذرية والليزر (1) =================
+            {
+                id: 'ch8_1', chapter: 'ch8', chapterName: 'الفصل الثامن: الأطياف الذرية والليزر', number: 'نشاط (1)',
+                ministry: 'وزاري: د3 2014 • ت 2017',
+                title: 'نشاط يوضح أنواع الأطياف (الموشور وأنابيب التفريغ والمصباح الخويطي)',
+                question: 'وضح بنشاط أنواع الأطياف؟',
+                interactionHint: 'اسحب أي أنبوب غاز (الهيدروجين، النيون، بخار الزئبق) أو المصباح الخويطي وضعه في الحامل أمام الشق والموشور لمشاهدة طيفه على الشاشة!',
+                hasDrag: true,
+                tools: [
+                    'موشور زجاجي وعدسة مكثفة (لامة).',
+                    'حاجز ذو شق وشاشة بيضاء.',
+                    'أنابيب تفريغ تحتوي غاز مثل: (النيون، الهيدروجين، بخار الزئبق).',
+                    'مصباح كهربائي خويطي ومصدر للتيار الكهربائي.'
+                ],
+                steps: [
+                    'نربط الأنبوب الذي يحتوي الهيدروجين بالدائرة الكهربائية المناسبة لكي يتوهج غاز الهيدروجين.',
+                    'نضع الموشور الزجاجي في مسار الحزمة المنبعثة من أنبوب غاز الهيدروجين، ثم نغير موقع وزاوية سقوط الحزمة حتى نحصل على أوضح طيف ممكن على الشاشة.',
+                    'نلاحظ شكل ولون الطيف الظاهر على الشاشة.',
+                    'نكرر الخطوات السابقة باستعمال أنابيب الغازات الأخرى والمصباح الكهربائي الخويطي ونلاحظ شكل ولون الأطياف المختلفة على الشاشة.'
+                ],
+                conclusion: [
+                    'نستنتج من النشاط أن الطيف الناتج من تحليل الإشعاعات المنبعثة من الغازات يختلف باختلاف نوع الغاز.'
+                ],
+                simType: 'spectra_prism'
+            }
+        ];
 
-    function setFilter(chap, btn) {
-      currentChapter = chap;
-      document.querySelectorAll('.filter-buttons .btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderExperiments();
-    }
+        // حالة التطبيق
+        let appState = {
+            selectedChapter: 'all',
+            searchQuery: '',
+            activeActivityId: 'ch1_1',
+            completedIds: JSON.parse(localStorage.getItem('ghazwan_physics_completed') || '[]'),
+            globalQuizMode: false,
+            revealedIds: {},
+            isDark: false,
+            isFullscreen: false
+        };
 
-    function filterExperiments() {
-      renderExperiments();
-    }
+        // متغيرات المحاكاة الحية على الـ Canvas
+        let simEngine = {
+            animId: null,
+            data: {},
+            draggingItem: null,
+            dragOffset: { x: 0, y: 0 }
+        };
 
-    // التشغيل الأول
-    renderExperiments();
-  </script>
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChapterTabs();
+            renderActivitiesList();
+            renderWorkspace();
+            updateProgressUI();
+
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                appState.searchQuery = e.target.value.trim();
+                document.getElementById('clearSearchBtn').classList.toggle('hidden', !appState.searchQuery);
+                renderActivitiesList();
+            });
+        });
+
+        // دوال شاشة المقدمة
+        function enterLab() {
+            const intro = document.getElementById('introScreen');
+            intro.classList.add('intro-hidden');
+        }
+        function showIntro() {
+            const intro = document.getElementById('introScreen');
+            intro.classList.remove('intro-hidden');
+        }
+
+        // تبديل الوضع الليلي/النهاري
+        function toggleTheme() {
+            appState.isDark = !appState.isDark;
+            document.documentElement.classList.toggle('dark', appState.isDark);
+            const icon = document.getElementById('themeIcon');
+            icon.className = appState.isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        }
+
+        // وضع الاختبار الذاتي
+        function toggleGlobalQuizMode() {
+            appState.globalQuizMode = !appState.globalQuizMode;
+            appState.revealedIds = {};
+            const label = document.getElementById('globalQuizLabel');
+            label.textContent = appState.globalQuizMode ? 'إظهار الاستنتاجات' : 'اختبر نفسك';
+            renderWorkspace();
+        }
+
+        function toggleRevealConclusion(id) {
+            appState.revealedIds[id] = !appState.revealedIds[id];
+            renderWorkspace();
+        }
+
+        // حفظ التقدم
+        function toggleComplete(id) {
+            const idx = appState.completedIds.indexOf(id);
+            if (idx === -1) appState.completedIds.push(id);
+            else appState.completedIds.splice(idx, 1);
+            localStorage.setItem('ghazwan_physics_completed', JSON.stringify(appState.completedIds));
+            updateProgressUI();
+            renderActivitiesList();
+            renderWorkspace();
+        }
+
+        function resetProgress() {
+            appState.completedIds = [];
+            localStorage.setItem('ghazwan_physics_completed', '[]');
+            updateProgressUI();
+            renderActivitiesList();
+            renderWorkspace();
+        }
+
+        function updateProgressUI() {
+            const done = appState.completedIds.length;
+            const total = activities.length;
+            document.getElementById('completedCount').textContent = done;
+            document.getElementById('progressBar').style.width = `${Math.round((done / total) * 100)}%`;
+        }
+
+        // رسم أزرار الفصول
+        function renderChapterTabs() {
+            const container = document.getElementById('chapterTabs');
+            container.innerHTML = chapters.map(ch => {
+                const count = ch.id === 'all' ? activities.length : activities.filter(a => a.chapter === ch.id).length;
+                const active = appState.selectedChapter === ch.id;
+                return `
+                    <button onclick="selectChapter('${ch.id}')"
+                        class="shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
+                            active
+                            ? 'bg-blue-700 text-white border-blue-700 shadow-sm'
+                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-400'
+                        }">
+                        <span>${ch.title}</span>
+                        <span class="px-1.5 py-0.5 rounded-md text-[10px] ${active ? 'bg-blue-800 text-blue-100' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">${count}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectChapter(chId) {
+            appState.selectedChapter = chId;
+            const chObj = chapters.find(c => c.id === chId);
+            document.getElementById('listHeaderTitle').textContent = chId === 'all' ? 'جميع الأنشطة' : chObj.short;
+            renderChapterTabs();
+            const filtered = getFilteredActivities();
+            if (filtered.length > 0 && !filtered.some(a => a.id === appState.activeActivityId)) {
+                appState.activeActivityId = filtered[0].id;
+            }
+            renderActivitiesList();
+            renderWorkspace();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            appState.searchQuery = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            renderActivitiesList();
+        }
+
+        function getFilteredActivities() {
+            const q = appState.searchQuery.toLowerCase();
+            return activities.filter(act => {
+                const matchCh = appState.selectedChapter === 'all' || act.chapter === appState.selectedChapter;
+                if (!matchCh) return false;
+                if (!q) return true;
+                const blob = [act.title, act.question, act.chapterName, act.ministry, ...act.tools, ...act.steps, ...act.conclusion].join(' ').toLowerCase();
+                return blob.includes(q);
+            });
+        }
+
+        // رسم القائمة الجانبية للأنشطة
+        function renderActivitiesList() {
+            const listEl = document.getElementById('activitiesList');
+            const filtered = getFilteredActivities();
+            document.getElementById('filteredCountBadge').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div class="p-8 text-center text-slate-400 text-sm">
+                        <p class="mb-2">لا توجد نتائج مطابقة للبحث.</p>
+                        <button onclick="clearSearch(); selectChapter('all');" class="text-blue-600 font-bold underline">عرض كل الأنشطة</button>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(act => {
+                const isActive = act.id === appState.activeActivityId;
+                const isDone = appState.completedIds.includes(act.id);
+                return `
+                    <button onclick="selectActivity('${act.id}')"
+                        class="w-full text-right p-3.5 transition flex items-start gap-3 ${
+                            isActive
+                            ? 'bg-blue-50/90 dark:bg-blue-950/40 border-r-4 border-blue-700'
+                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/80'
+                        }">
+                        <div class="mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold ${
+                            isDone
+                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400'
+                            : (isActive ? 'bg-blue-700 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300')
+                        }">
+                            ${isDone ? '<i class="fa-solid fa-check"></i>' : act.number.replace(/[^0-9]/g, '')}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-1.5 mb-0.5">
+                                <span class="text-[11px] font-bold text-blue-700 dark:text-blue-400">${act.chapterName}</span>
+                                ${act.hasDrag ? '<span class="px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 text-[10px] font-bold">سحب وإفلات</span>' : ''}
+                            </div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-2 leading-snug">
+                                ${act.title}
+                            </div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectActivity(id) {
+            appState.activeActivityId = id;
+            renderActivitiesList();
+            renderWorkspace();
+            // تمرير سلس نحو المختبر على الموبايل
+            if (window.innerWidth < 1024) {
+                document.getElementById('workspaceContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // تبديل ملء الشاشة للمختبر
+        function toggleLabFullscreen() {
+            appState.isFullscreen = !appState.isFullscreen;
+            const box = document.getElementById('labStageBox');
+            const btnText = document.getElementById('fsBtnText');
+            if (appState.isFullscreen) {
+                box.classList.add('lab-fullscreen');
+                if (btnText) btnText.textContent = 'إنهاء ملء الشاشة';
+            } else {
+                box.classList.remove('lab-fullscreen');
+                if (btnText) btnText.textContent = 'تكبير المختبر';
+            }
+            resizeLabCanvas();
+        }
+
+        // رسم مساحة العمل الرئيسية (المختبر الكبير + الأدوات + الخطوات + الاستنتاج)
+        function renderWorkspace() {
+            const act = activities.find(a => a.id === appState.activeActivityId) || activities[0];
+            const isDone = appState.completedIds.includes(act.id);
+            const isBlurred = appState.globalQuizMode && !appState.revealedIds[act.id];
+            const container = document.getElementById('workspaceContainer');
+
+            container.innerHTML = `
+                <!-- بطاقة رأس النشاط -->
+                <div class="bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="px-3 py-1 rounded-lg bg-blue-50 dark:bg-blue-950 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-extrabold">
+                                ${act.chapterName} • ${act.number}
+                            </span>
+                            <span class="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold">
+                                ${act.ministry}
+                            </span>
+                        </div>
+                        <button onclick="toggleComplete('${act.id}')"
+                            class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 border ${
+                                isDone
+                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600 hover:border-emerald-500'
+                            }">
+                            <i class="fa-solid ${isDone ? 'fa-circle-check' : 'fa-circle'}"></i>
+                            <span>${isDone ? 'تم إتمام النشاط' : 'تمييز كمفهوم'}</span>
+                        </button>
+                    </div>
+
+                    <h2 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white leading-snug mb-2">
+                        ${act.title}
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/70 border-r-4 border-blue-600 pr-3 py-2 rounded-l-lg">
+                        <span class="font-extrabold text-blue-700 dark:text-blue-400">السؤال الوزاري: </span>${act.question}
+                    </p>
+                </div>
+
+                <!-- ==================== مساحة المختبر التفاعلي الكبيرة ==================== -->
+                <div id="labStageBox" class="bg-white dark:bg-slate-900 border-2 border-blue-200 dark:border-slate-700 rounded-3xl overflow-hidden shadow-md flex flex-col">
+                    <!-- شريط أدوات المختبر العلوي -->
+                    <div class="px-4 py-3 bg-slate-50 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="font-extrabold text-sm text-slate-800 dark:text-white">المختبر التفاعلي العملي</span>
+                            ${act.hasDrag ? '<span class="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 text-[11px] font-extrabold"><i class="fa-solid fa-hand-pointer ml-1"></i>اسحب العناصر بالماوس أو اللمس</span>' : ''}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="resetCurrentLab()" class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 transition">
+                                <i class="fa-solid fa-rotate-right ml-1"></i>إعادة ضبط التجربة
+                            </button>
+                            <button onclick="toggleLabFullscreen()" class="px-3 py-1.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold transition">
+                                <i class="fa-solid fa-expand ml-1"></i><span id="fsBtnText">تكبير المختبر</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- تعليمات التفاعل المباشرة -->
+                    <div class="px-4 py-2 bg-blue-50/70 dark:bg-blue-950/30 border-b border-blue-100 dark:border-slate-800 text-xs font-semibold text-blue-900 dark:text-blue-200 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-blue-600 dark:text-blue-400"></i>
+                        <span>${act.interactionHint}</span>
+                    </div>
+
+                    <!-- لوحة الرسم التفاعلية الكبيرة (Canvas) -->
+                    <div class="lab-stage-wrapper relative w-full bg-slate-50/50 dark:bg-slate-950 flex-1 flex flex-col">
+                        <canvas id="labCanvas" class="w-full h-[420px] sm:h-[470px] block cursor-grab-custom"></canvas>
+                    </div>
+
+                    <!-- لوحة التحكم السفلية الإضافية للمختبر -->
+                    <div id="labControlsBar" class="px-4 py-3.5 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700">
+                        <!-- يتم توليد الأزرار والمنزلقات المساعدة هنا -->
+                    </div>
+                </div>
+
+                <!-- ==================== صندوق الاستنتاج العلمي البارز ==================== -->
+                <div class="bg-emerald-50/70 dark:bg-emerald-950/25 border-2 border-emerald-200 dark:border-emerald-800/70 rounded-2xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                                <i class="fa-solid fa-lightbulb"></i>
+                            </div>
+                            <h3 class="text-base sm:text-lg font-black text-emerald-900 dark:text-emerald-300">
+                                الاستنتاج العلمي للنشاط
+                            </h3>
+                        </div>
+                        <button onclick="toggleRevealConclusion('${act.id}')"
+                            class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-700 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 transition flex items-center gap-1.5">
+                            <i class="fa-solid ${isBlurred ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                            <span>${isBlurred ? 'إظهار الاستنتاج' : 'إخفاء للاختبار'}</span>
+                        </button>
+                    </div>
+                    <div class="space-y-2 text-sm sm:text-base text-slate-800 dark:text-emerald-100 leading-relaxed ${isBlurred ? 'blurred-conclusion' : ''}">
+                        ${act.conclusion.map(c => `<p class="flex items-start gap-2"><span class="text-emerald-600 dark:text-emerald-400 font-black mt-0.5">✓</span><span>${c}</span></p>`).join('')}
+                    </div>
+                </div>
+
+                <!-- ==================== الأدوات وخطوات النشاط ==================== -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- الأدوات -->
+                    <div class="bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+                        <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-screwdriver-wrench text-blue-600"></i>
+                            <span>أدوات النشاط</span>
+                        </h3>
+                        <ul class="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                            ${act.tools.map(t => `<li class="flex items-start gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-600 mt-2 shrink-0"></span><span>${t}</span></li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- الخطوات -->
+                    <div class="bg-white dark:bg-slate-800/70 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+                        <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-list-ol text-blue-600"></i>
+                            <span>خطوات النشاط</span>
+                        </h3>
+                        <ol class="space-y-2.5 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                            ${act.steps.map((s, idx) => `
+                                <li class="flex items-start gap-2.5">
+                                    <span class="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 text-xs font-extrabold flex items-center justify-center shrink-0 mt-0.5">${idx + 1}</span>
+                                    <span>${s}</span>
+                                </li>
+                            `).join('')}
+                        </ol>
+                    </div>
+                </div>
+            `;
+
+            initLabSimulation(act);
+        }
+
+        // =========================================================================
+        // محرك المختبر التفاعلي الكبير (Canvas + Pointer Drag & Drop)
+        // =========================================================================
+        function resetCurrentLab() {
+            const act = activities.find(a => a.id === appState.activeActivityId) || activities[0];
+            initLabSimulation(act);
+        }
+
+        function resizeLabCanvas() {
+            const canvas = document.getElementById('labCanvas');
+            if (!canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+        }
+
+        window.addEventListener('resize', () => {
+            resizeLabCanvas();
+        });
+
+        function initLabSimulation(act) {
+            if (simEngine.animId) cancelAnimationFrame(simEngine.animId);
+            simEngine.draggingItem = null;
+
+            const canvas = document.getElementById('labCanvas');
+            const controlsBar = document.getElementById('labControlsBar');
+            if (!canvas || !controlsBar) return;
+
+            resizeLabCanvas();
+            const ctx = canvas.getContext('2d');
+            const getW = () => canvas.getBoundingClientRect().width;
+            const getH = () => canvas.getBoundingClientRect().height;
+
+            // تهيئة بيانات كل تجربة
+            const W0 = getW();
+            const H0 = getH();
+
+            switch (act.simType) {
+                case 'cap_dielectric':
+                    simEngine.data = {
+                        k: 4,
+                        dielX: W0 * 0.16,
+                        dielY: H0 * 0.32,
+                        dielW: 90,
+                        dielH: 170,
+                        insertion: 0 // 0 إلى 1
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex items-center gap-3 flex-1 min-w-[220px]">
+                                <span class="text-xs font-bold">ثابت العزل (K):</span>
+                                <input type="range" id="ctrl_k" min="2" max="6" step="1" value="4" class="flex-1">
+                                <span id="lbl_k" class="text-xs font-black text-blue-700 dark:text-blue-400">K = 4</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="simEngine.data.dielX = document.getElementById('labCanvas').getBoundingClientRect().width * 0.5 - 45" class="px-3 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold">إدخال العازل بالكامل</button>
+                                <button onclick="simEngine.data.dielX = document.getElementById('labCanvas').getBoundingClientRect().width * 0.15" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold">إخراج العازل</button>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('ctrl_k').oninput = (e) => {
+                        simEngine.data.k = parseInt(e.target.value);
+                        document.getElementById('lbl_k').textContent = `K = ${simEngine.data.k}`;
+                    };
+                    break;
+
+                case 'cap_area':
+                    simEngine.data = {
+                        offsetX: 0, // 0 إلى 120
+                        maxOffset: 120
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <span class="text-xs text-slate-600 dark:text-slate-300">يمكنك سحب الصفيحة السفلية مباشرة على اللوحة أو استخدام الأزرار:</span>
+                            <div class="flex gap-2">
+                                <button onclick="simEngine.data.offsetX = 0" class="px-3 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold">مساحة كاملة (A)</button>
+                                <button onclick="simEngine.data.offsetX = 90" class="px-3 py-1.5 rounded-lg bg-amber-600 text-white text-xs font-bold">نصف المساحة (½ A)</button>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'cap_dist':
+                    simEngine.data = {
+                        dist: 120 // من 60 (نصف البعد) إلى 180
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <span class="text-xs text-slate-600 dark:text-slate-300">اسحب الصفيحة اليمنى لتغيير البعد (d):</span>
+                            <div class="flex gap-2">
+                                <button onclick="simEngine.data.dist = 120" class="px-3 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold">البعد الابتدائي (d)</button>
+                                <button onclick="simEngine.data.dist = 60" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">تقريب الصفيحتين (½ d)</button>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'cap_cd':
+                    simEngine.data = {
+                        switchPos: act.id === 'ch1_5' ? 1 : 0, // 0 مفتوح، 1 شحن، 2 تفريغ
+                        charge: act.id === 'ch1_5' ? 1.0 : 0.0,
+                        current: 0,
+                        history: []
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-center gap-3">
+                            <button onclick="setCapSwitch(1)" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold">الموقع (1): شحن المتسعة</button>
+                            <button onclick="setCapSwitch(0)" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-extrabold">وضع الحياد (مفتوح)</button>
+                            <button onclick="setCapSwitch(2)" class="px-4 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-extrabold">الموقع (2): تفريغ المتسعة</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'em_magnet_coil':
+                    simEngine.data = {
+                        magX: W0 * 0.22,
+                        lastMagX: W0 * 0.22,
+                        velocity: 0,
+                        current: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <span class="text-xs text-slate-600 dark:text-slate-300">اسحب الساق المغناطيسية بسرعة يميناً ويساراً أمام الملف أو داخله!</span>
+                            <div class="flex gap-2">
+                                <button onclick="autoMoveMagnet(1)" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">تقريب تلقائي →</button>
+                                <button onclick="autoMoveMagnet(-1)" class="px-3 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold">← إبعاد تلقائي</button>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'faraday_ring':
+                    simEngine.data = {
+                        closed: false,
+                        pulse: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex items-center justify-center gap-3">
+                            <button onclick="toggleFaradaySwitch(true)" class="px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-extrabold">إغلاق المفتاح (لحظي)</button>
+                            <button onclick="toggleFaradaySwitch(false)" class="px-5 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold">فتح المفتاح (لحظي)</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'em_three_cases':
+                    simEngine.data = {
+                        mode: 1, // 1 ساق، 2 ملفان، 3 مفتاح
+                        objX: W0 * 0.22,
+                        lastObjX: W0 * 0.22,
+                        closed: false,
+                        current: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex gap-1.5">
+                                <button onclick="simEngine.data.mode=1; simEngine.data.objX=150" class="px-3 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold">أولاً: ساق مغناطيسية</button>
+                                <button onclick="simEngine.data.mode=2; simEngine.data.objX=150" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold">ثانياً: ملفان متحركان</button>
+                                <button onclick="simEngine.data.mode=3; simEngine.data.objX=420" class="px-3 py-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold">ثالثاً: ملفان ومفتاح</button>
+                            </div>
+                            <button onclick="simEngine.data.closed=!simEngine.data.closed; simEngine.data.current = simEngine.data.closed ? 1 : -1" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">فتح / إغلاق المفتاح</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'eddy_pendulum':
+                    simEngine.data = {
+                        angleSolid: 0.65,
+                        velSolid: 0,
+                        angleSlotted: 0.65,
+                        velSlotted: 0,
+                        released: false
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex items-center justify-center gap-3">
+                            <button onclick="simEngine.data.angleSolid=0.7; simEngine.data.angleSlotted=0.7; simEngine.data.velSolid=0; simEngine.data.velSlotted=0; simEngine.data.released=false" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-extrabold">إزاحة البندولين معاً</button>
+                            <button onclick="simEngine.data.released=true" class="px-5 py-2 rounded-xl bg-blue-700 text-white text-xs font-extrabold">إفلات البندولين الآن!</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'inductance_lamps':
+                    simEngine.data = {
+                        closed: false,
+                        iR: 0,
+                        iL: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex items-center justify-center gap-3">
+                            <button onclick="simEngine.data.closed=true" class="px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-extrabold">إغلاق المفتاح الكهربائي</button>
+                            <button onclick="simEngine.data.closed=false; simEngine.data.iR=0; simEngine.data.iL=0" class="px-5 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-extrabold">فتح المفتاح</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'neon_inductor':
+                    simEngine.data = {
+                        closed: false,
+                        neonFlash: 0,
+                        coilEnergy: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex items-center justify-center gap-3">
+                            <button onclick="simEngine.data.closed=true" class="px-5 py-2 rounded-xl bg-blue-700 text-white text-xs font-extrabold">1. إغلاق المفتاح (شحن الملف بـ 9V)</button>
+                            <button onclick="if(simEngine.data.closed){ simEngine.data.neonFlash = 1.0; } simEngine.data.closed=false" class="px-5 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold">2. فتح المفتاح فجأة (توهج النيون 80V!)</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'ac_xl_f':
+                case 'ac_xl_l':
+                case 'ac_xc_f':
+                case 'ac_xc_c': {
+                    const isInd = act.simType.startsWith('ac_xl');
+                    const isDragCore = act.simType === 'ac_xl_l' || act.simType === 'ac_xc_c';
+                    simEngine.data = {
+                        val: 50,
+                        coreX: W0 * 0.15,
+                        phase: 0
+                    };
+                    if (isDragCore) {
+                        controlsBar.innerHTML = `
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-xs font-bold">${act.simType === 'ac_xl_l' ? 'اسحب قلب الحديد المطاوع وأدخله في جوف الملف:' : 'اسحب اللوح العازل وأدخله بين صفيحتي المتسعة:'}</span>
+                                <input type="range" id="ctrl_ac" min="20" max="100" value="50" class="w-44">
+                            </div>
+                        `;
+                    } else {
+                        controlsBar.innerHTML = `
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs font-bold">تردد المذبذب الكهربائي (f):</span>
+                                <input type="range" id="ctrl_ac" min="20" max="100" value="50" class="flex-1">
+                                <span id="lbl_ac" class="text-xs font-black text-blue-700 dark:text-blue-400 math-ltr">50 Hz</span>
+                            </div>
+                        `;
+                    }
+                    document.getElementById('ctrl_ac').oninput = (e) => {
+                        simEngine.data.val = parseInt(e.target.value);
+                        if (document.getElementById('lbl_ac')) document.getElementById('lbl_ac').textContent = `${simEngine.data.val} Hz`;
+                    };
+                    break;
+                }
+
+                case 'em_detect_e':
+                case 'em_detect_b':
+                    simEngine.data = {
+                        capFreq: 80,
+                        wavePhase: 0,
+                        angle: 0 // للهوائي الحلقي
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center gap-4">
+                            <span class="text-xs font-bold">توليف سعة المتسعة المتغيرة (C):</span>
+                            <input type="range" id="ctrl_tune" min="70" max="130" step="5" value="80" class="flex-1">
+                            <span id="lbl_tune" class="text-xs font-black text-blue-700 dark:text-blue-400 math-ltr">80 MHz (الهدف: 100 MHz)</span>
+                        </div>
+                    `;
+                    document.getElementById('ctrl_tune').oninput = (e) => {
+                        simEngine.data.capFreq = parseInt(e.target.value);
+                        document.getElementById('lbl_tune').textContent = `${simEngine.data.capFreq} MHz (الهدف: 100 MHz)`;
+                    };
+                    break;
+
+                case 'hertz_exp':
+                    simEngine.data = {
+                        rxAngle: 0, // 0 موازي، 90 عمودي
+                        spark: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold">زاوية حلقة الاستقبال:</span>
+                                <button onclick="simEngine.data.rxAngle=0" class="px-3 py-1 rounded-lg bg-blue-700 text-white text-xs font-bold">موازية للمرسل (0°)</button>
+                                <button onclick="simEngine.data.rxAngle=90" class="px-3 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold">متعامدة (90°)</button>
+                            </div>
+                            <button onclick="simEngine.data.spark=1.0" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold">إحداث شرارة في دائرة الإرسال</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'wave_interference':
+                    simEngine.data = {
+                        phaseDiff: 0, // 0 بناء، PI إتلاف
+                        t: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex items-center justify-center gap-3">
+                            <button onclick="simEngine.data.phaseDiff=0" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-extrabold">موجتان بطور واحد (تداخل بنّاء)</button>
+                            <button onclick="simEngine.data.phaseDiff=Math.PI" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold">طوران متعاكسان (تداخل إتلافي)</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'young_slits':
+                    simEngine.data = {
+                        lambda: 650,
+                        slitD: 30
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center gap-4">
+                            <span class="text-xs font-bold">الطول الموجي للضوء (λ):</span>
+                            <input type="range" id="ctrl_lam" min="420" max="700" step="20" value="650" class="flex-1">
+                            <span id="lbl_lam" class="text-xs font-black text-rose-600 math-ltr">650 nm</span>
+                        </div>
+                    `;
+                    document.getElementById('ctrl_lam').oninput = (e) => {
+                        simEngine.data.lambda = parseInt(e.target.value);
+                        document.getElementById('lbl_lam').textContent = `${simEngine.data.lambda} nm`;
+                    };
+                    break;
+
+                case 'light_diffraction':
+                    simEngine.data = {
+                        scratched: false,
+                        pinX: W0 * 0.25
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-xs font-bold">اسحب الدبوس عبر اللوح الزجاجي المطلي بالأسود لعمل شق رفيع!</span>
+                            <button onclick="simEngine.data.scratched=true" class="px-4 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold">عمل شق بالدبوس</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'polarization_tourmaline':
+                    simEngine.data = {
+                        angle: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <span class="text-xs font-bold">زاوية تدوير اللوح المحلل (θ):</span>
+                            <input type="range" id="ctrl_pol" min="0" max="90" step="5" value="0" class="flex-1">
+                            <span id="lbl_pol" class="text-xs font-black text-blue-700 dark:text-blue-400 math-ltr">0°</span>
+                        </div>
+                    `;
+                    document.getElementById('ctrl_pol').oninput = (e) => {
+                        simEngine.data.angle = parseInt(e.target.value);
+                        document.getElementById('lbl_pol').textContent = `${simEngine.data.angle}°`;
+                    };
+                    break;
+
+                case 'rope_polarization':
+                    simEngine.data = {
+                        vertical: true,
+                        t: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex items-center justify-center gap-3">
+                            <button onclick="simEngine.data.vertical=true" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-extrabold">جعل الشق عمودياً (يمرر الموجة)</button>
+                            <button onclick="simEngine.data.vertical=false" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold">جعل الشق أفقياً (يحجب الموجة)</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'photoelectric':
+                    simEngine.data = {
+                        intensity: 2,
+                        voltage: 2,
+                        t: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold shrink-0">شدة الضوء:</span>
+                                <input type="range" id="ctrl_pe_i" min="0" max="2" step="1" value="2" class="flex-1">
+                                <span id="lbl_pe_i" class="text-xs font-bold text-amber-600">عالية</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold shrink-0">فرق الجهد ΔV:</span>
+                                <input type="range" id="ctrl_pe_v" min="-2" max="4" step="1" value="2" class="flex-1">
+                                <span id="lbl_pe_v" class="text-xs font-bold text-blue-700 dark:text-blue-400 math-ltr">+2 V</span>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('ctrl_pe_i').oninput = (e) => {
+                        const v = parseInt(e.target.value);
+                        simEngine.data.intensity = v;
+                        document.getElementById('lbl_pe_i').textContent = v === 0 ? 'ظلام (0)' : (v === 1 ? 'منخفضة' : 'عالية');
+                    };
+                    document.getElementById('ctrl_pe_v').oninput = (e) => {
+                        const v = parseInt(e.target.value);
+                        simEngine.data.voltage = v;
+                        document.getElementById('lbl_pe_v').textContent = `${v > 0 ? '+' : ''}${v} V`;
+                    };
+                    break;
+
+                case 'spectra_prism':
+                    simEngine.data = {
+                        source: 'H' // H, Ne, Hg, Lamp
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-center gap-2">
+                            <button onclick="simEngine.data.source='H'" class="px-3.5 py-1.5 rounded-xl bg-blue-700 text-white text-xs font-bold">أنبوب الهيدروجين</button>
+                            <button onclick="simEngine.data.source='Ne'" class="px-3.5 py-1.5 rounded-xl bg-rose-600 text-white text-xs font-bold">أنبوب النيون</button>
+                            <button onclick="simEngine.data.source='Hg'" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold">بخار الزئبق</button>
+                            <button onclick="simEngine.data.source='Lamp'" class="px-3.5 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-bold">مصباح خويطي</button>
+                        </div>
+                    `;
+                    break;
+            }
+
+            // إعداد أحداث السحب والإفلات (Pointer Events)
+            setupCanvasDrag(canvas, act);
+
+            // حلقة الرسم
+            function loop() {
+                drawLabScene(ctx, getW(), getH(), act);
+                simEngine.animId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // دوال مساعدة لأزرار المختبر
+        function setCapSwitch(pos) {
+            simEngine.data.switchPos = pos;
+            if (pos === 1) simEngine.data.current = 1.0;
+            else if (pos === 2) simEngine.data.current = -1.0;
+            else simEngine.data.current = 0;
+        }
+
+        function autoMoveMagnet(dir) {
+            const canvas = document.getElementById('labCanvas');
+            if (!canvas) return;
+            const W = canvas.getBoundingClientRect().width;
+            simEngine.data.magX = dir === 1 ? W * 0.52 : W * 0.18;
+        }
+
+        function toggleFaradaySwitch(close) {
+            simEngine.data.closed = close;
+            simEngine.data.pulse = close ? 1.0 : -1.0;
+        }
+
+        // نظام السحب والإفلات الموحد للماوس واللمس
+        function setupCanvasDrag(canvas, act) {
+            const getPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            };
+
+            canvas.onpointerdown = (e) => {
+                const p = getPos(e);
+                const W = canvas.getBoundingClientRect().width;
+                const H = canvas.getBoundingClientRect().height;
+                canvas.setPointerCapture(e.pointerId);
+
+                if (act.simType === 'cap_dielectric') {
+                    simEngine.draggingItem = 'diel';
+                    simEngine.dragOffset.x = p.x - simEngine.data.dielX;
+                } else if (act.simType === 'cap_area') {
+                    simEngine.draggingItem = 'plateA';
+                    simEngine.dragOffset.x = p.x - simEngine.data.offsetX;
+                } else if (act.simType === 'cap_dist') {
+                    simEngine.draggingItem = 'plateD';
+                } else if (act.simType === 'cap_cd') {
+                    // النقر/السحب لتبديل المفتاح
+                    const next = simEngine.data.switchPos === 1 ? 2 : 1;
+                    setCapSwitch(next);
+                } else if (act.simType === 'em_magnet_coil') {
+                    simEngine.draggingItem = 'magnet';
+                    simEngine.dragOffset.x = p.x - simEngine.data.magX;
+                } else if (act.simType === 'faraday_ring') {
+                    toggleFaradaySwitch(!simEngine.data.closed);
+                } else if (act.simType === 'em_three_cases') {
+                    if (simEngine.data.mode === 3) {
+                        simEngine.data.closed = !simEngine.data.closed;
+                        simEngine.data.current = simEngine.data.closed ? 1 : -1;
+                    } else {
+                        simEngine.draggingItem = 'obj3';
+                        simEngine.dragOffset.x = p.x - simEngine.data.objX;
+                    }
+                } else if (act.simType === 'eddy_pendulum') {
+                    simEngine.draggingItem = 'pendulum';
+                    simEngine.data.released = false;
+                } else if (act.simType === 'neon_inductor') {
+                    if (simEngine.data.closed) simEngine.data.neonFlash = 1.0;
+                    simEngine.data.closed = !simEngine.data.closed;
+                } else if (act.simType === 'ac_xl_l' || act.simType === 'ac_xc_c') {
+                    simEngine.draggingItem = 'core';
+                } else if (act.simType === 'polarization_tourmaline') {
+                    simEngine.draggingItem = 'pol';
+                } else if (act.simType === 'rope_polarization') {
+                    simEngine.data.vertical = !simEngine.data.vertical;
+                } else if (act.simType === 'light_diffraction') {
+                    simEngine.draggingItem = 'pin';
+                } else if (act.simType === 'spectra_prism') {
+                    // النقر أو السحب على الأنابيب الجانبية لاختيارها
+                    const sources = ['H', 'Ne', 'Hg', 'Lamp'];
+                    const idx = Math.floor((p.y / H) * 4);
+                    if (sources[idx]) simEngine.data.source = sources[idx];
+                }
+            };
+
+            canvas.onpointermove = (e) => {
+                if (!simEngine.draggingItem) return;
+                const p = getPos(e);
+                const W = canvas.getBoundingClientRect().width;
+                const H = canvas.getBoundingClientRect().height;
+
+                if (simEngine.draggingItem === 'diel') {
+                    simEngine.data.dielX = Math.max(40, Math.min(W * 0.55, p.x - simEngine.dragOffset.x));
+                } else if (simEngine.draggingItem === 'plateA') {
+                    simEngine.data.offsetX = Math.max(0, Math.min(130, p.x - simEngine.dragOffset.x));
+                } else if (simEngine.draggingItem === 'plateD') {
+                    const center = W * 0.45;
+                    simEngine.data.dist = Math.max(55, Math.min(180, p.x - center));
+                } else if (simEngine.draggingItem === 'magnet') {
+                    simEngine.data.magX = Math.max(40, Math.min(W * 0.62, p.x - simEngine.dragOffset.x));
+                } else if (simEngine.draggingItem === 'obj3') {
+                    simEngine.data.objX = Math.max(40, Math.min(W * 0.58, p.x - simEngine.dragOffset.x));
+                } else if (simEngine.draggingItem === 'pendulum') {
+                    const ang = Math.max(-0.8, Math.min(0.8, (p.x - W * 0.5) / 180));
+                    simEngine.data.angleSolid = ang;
+                    simEngine.data.angleSlotted = ang;
+                } else if (simEngine.draggingItem === 'core') {
+                    const pct = Math.max(20, Math.min(100, Math.round((p.x / (W * 0.6)) * 100)));
+                    simEngine.data.val = pct;
+                    const slider = document.getElementById('ctrl_ac');
+                    if (slider) slider.value = pct;
+                } else if (simEngine.draggingItem === 'pol') {
+                    const deg = Math.max(0, Math.min(90, Math.round((p.y / H) * 90)));
+                    simEngine.data.angle = deg;
+                    const slider = document.getElementById('ctrl_pol');
+                    if (slider) slider.value = deg;
+                    const lbl = document.getElementById('lbl_pol');
+                    if (lbl) lbl.textContent = `${deg}°`;
+                } else if (simEngine.draggingItem === 'pin') {
+                    simEngine.data.pinX = p.x;
+                    if (Math.abs(p.x - W * 0.5) < 40) simEngine.data.scratched = true;
+                }
+            };
+
+            canvas.onpointerup = () => {
+                if (simEngine.draggingItem === 'pendulum') {
+                    simEngine.data.released = true;
+                }
+                simEngine.draggingItem = null;
+            };
+        }
+
+        // =========================================================================
+        // دالة الرسم الرئيسية للمشاهد الفيزيائية الـ 26
+        // =========================================================================
+        function drawLabScene(ctx, W, H, act) {
+            ctx.clearRect(0, 0, W, H);
+            const isDark = appState.isDark;
+            const textMain = isDark ? '#f1f5f9' : '#1e293b';
+            const textMuted = isDark ? '#94a3b8' : '#64748b';
+            const wireColor = isDark ? '#64748b' : '#475569';
+
+            ctx.font = 'bold 14px Cairo, sans-serif';
+            ctx.textAlign = 'center';
+
+            // 1. إدخال العازل الكهربائي
+            if (act.simType === 'cap_dielectric') {
+                const d = simEngine.data;
+                const capCenterX = W * 0.52;
+                const plateW = 14, plateH = 190;
+                const gap = 110;
+                const leftPlateX = capCenterX - gap / 2 - plateW;
+                const rightPlateX = capCenterX + gap / 2;
+                const topY = H * 0.25;
+
+                // حساب نسبة الإدخال
+                const overlap = Math.max(0, Math.min(gap, (d.dielX + d.dielW) - (leftPlateX + plateW)));
+                const frac = overlap / gap;
+                const kEff = 1 + (d.k - 1) * frac;
+                const vVal = (12 / kEff).toFixed(1);
+                const cVal = (10 * kEff).toFixed(1);
+
+                // رسم الأسلاك والفولطميتر
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(leftPlateX, topY + plateH / 2);
+                ctx.lineTo(leftPlateX - 50, topY + plateH / 2);
+                ctx.lineTo(leftPlateX - 50, topY - 45);
+                ctx.lineTo(rightPlateX + 64, topY - 45);
+                ctx.lineTo(rightPlateX + 64, topY + plateH / 2);
+                ctx.lineTo(rightPlateX + plateW, topY + plateH / 2);
+                ctx.stroke();
+
+                // جهاز الفولطميتر
+                drawMeter(ctx, capCenterX, topY - 45, 'V', `${vVal} V`, '#2563eb', isDark);
+
+                // الصفيحة الموجبة والسالبة
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect(leftPlateX, topY, plateW, plateH);
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(rightPlateX, topY, plateW, plateH);
+
+                ctx.fillStyle = '#e11d48';
+                ctx.fillText('+Q', leftPlateX + 7, topY - 10);
+                ctx.fillStyle = '#0284c7';
+                ctx.fillText('-Q', rightPlateX + 7, topY - 10);
+
+                // اللوح العازل القابل للسحب
+                ctx.fillStyle = 'rgba(37, 99, 235, 0.25)';
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.roundRect(d.dielX, topY + 10, d.dielW, plateH - 20, 8);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = isDark ? '#93c5fd' : '#1e40af';
+                ctx.fillText(`عازل K=${d.k}`, d.dielX + d.dielW / 2, topY + plateH / 2);
+                ctx.font = '12px Cairo';
+                ctx.fillText('← اسحبني →', d.dielX + d.dielW / 2, topY + plateH / 2 + 22);
+
+                // لوحة النتائج
+                drawReadoutBox(ctx, W * 0.5, H - 55, `ΔV = ${vVal} V   |   السعة C = ${cVal} μF   |   الشحنة Q = 120 μC (ثابتة)`, isDark);
+            }
+
+            // 2. تغير المساحة A
+            else if (act.simType === 'cap_area') {
+                const d = simEngine.data;
+                const cx = W * 0.5;
+                const topY = H * 0.35;
+                const pW = 200, pH = 14;
+                const ratio = Math.max(0.35, 1 - d.offsetX / 200);
+                const vVal = (10 / ratio).toFixed(1);
+
+                // الصفيحة العلوية الثابتة
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect(cx - pW / 2, topY, pW, pH);
+                ctx.fillText('صفيحة ثابتة (+Q)', cx, topY - 12);
+
+                // منطقة التقابل
+                const overlapW = pW - d.offsetX;
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+                ctx.fillRect(cx - pW / 2 + d.offsetX, topY + pH, overlapW, 70);
+
+                // الصفيحة السفلية المتحركة
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(cx - pW / 2 + d.offsetX, topY + pH + 70, pW, pH);
+                ctx.fillText('اسحب الصفيحة جانباً (-Q)', cx + d.offsetX, topY + pH + 105);
+
+                drawMeter(ctx, cx, topY - 55, 'V', `${vVal} V`, '#d97706', isDark);
+                drawReadoutBox(ctx, cx, H - 50, `المساحة المتقابلة: ${Math.round(ratio * 100)}% A   |   فرق الجهد: ${vVal} V   |   السعة: ${ratio.toFixed(2)} C₀`, isDark);
+            }
+
+            // 3. تغير البعد d
+            else if (act.simType === 'cap_dist') {
+                const d = simEngine.data;
+                const leftX = W * 0.38;
+                const rightX = leftX + d.dist;
+                const topY = H * 0.28;
+                const pH = 170;
+                const dRatio = (d.dist / 120).toFixed(2);
+                const vVal = (10 * dRatio).toFixed(1);
+
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect(leftX, topY, 14, pH);
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(rightX, topY, 14, pH);
+
+                // سهم البعد
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(leftX + 18, topY + pH / 2);
+                ctx.lineTo(rightX - 4, topY + pH / 2);
+                ctx.stroke();
+                ctx.fillStyle = textMain;
+                ctx.fillText(`البعد = ${dRatio} d`, (leftX + rightX) / 2, topY + pH / 2 - 10);
+                ctx.fillText('← اسحب →', rightX + 7, topY + pH + 22);
+
+                drawMeter(ctx, W * 0.5, topY - 45, 'V', `${vVal} V`, '#2563eb', isDark);
+                drawReadoutBox(ctx, W * 0.5, H - 50, `البعد d = ${dRatio} d₀   |   قراءة الفولطميتر = ${vVal} V   |   السعة C = ${(1 / dRatio).toFixed(2)} C₀`, isDark);
+            }
+
+            // 4 & 5. شحن وتفريغ المتسعة
+            else if (act.simType === 'cap_cd') {
+                const d = simEngine.data;
+                if (d.switchPos === 1) {
+                    d.charge = Math.min(1, d.charge + 0.015);
+                    d.current = Math.max(0, 1 - d.charge);
+                } else if (d.switchPos === 2) {
+                    d.charge = Math.max(0, d.charge - 0.015);
+                    d.current = d.charge > 0.01 ? -d.charge : 0;
+                } else {
+                    d.current = 0;
+                }
+
+                const cx = W * 0.5, cy = H * 0.45;
+                // رسم الدائرة
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(cx - 170, cy - 90, 340, 180);
+
+                // المتسعة في الوسط
+                ctx.clearRect(cx - 30, cy - 105, 60, 30);
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect(cx - 20, cy - 115, 8, 50);
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(cx + 12, cy - 115, 8, 50);
+                ctx.fillStyle = textMain;
+                ctx.fillText(`نسبة الشحن: ${Math.round(d.charge * 100)}%`, cx, cy - 125);
+
+                // الكلفانوميتر
+                drawMeter(ctx, cx - 95, cy - 90, 'G', d.current > 0.05 ? 'يمين →' : (d.current < -0.05 ? '← يسار' : '0'), '#059669', isDark);
+
+                // المصباحان L1 و L2
+                const glow1 = d.switchPos === 1 && d.current > 0.1;
+                const glow2 = d.switchPos === 2 && d.current < -0.1;
+                drawBulb(ctx, cx - 170, cy, 'L₁', glow1, isDark);
+                drawBulb(ctx, cx + 170, cy, 'L₂', glow2, isDark);
+
+                // البطارية في الأسفل
+                ctx.fillStyle = textMain;
+                ctx.fillText('بطارية (ΔV)', cx, cy + 112);
+
+                drawReadoutBox(ctx, cx, H - 35, d.switchPos === 1 ? 'المفتاح بالموقع (1): عملية شحن المتسعة' : (d.switchPos === 2 ? 'المفتاح بالموقع (2): عملية تفريغ المتسعة' : 'اختر موقع المفتاح (1) للشحن أو (2) للتفريغ'), isDark);
+            }
+
+            // 6. ساق مغناطيسية وملف وأميتر رقمي
+            else if (act.simType === 'em_magnet_coil') {
+                const d = simEngine.data;
+                const dx = d.magX - d.lastMagX;
+                d.velocity = d.velocity * 0.8 + dx * 0.25;
+                d.lastMagX = d.magX;
+
+                const coilX = W * 0.62, cy = H * 0.48;
+                // رسم الملف
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 5;
+                for (let i = 0; i < 7; i++) {
+                    ctx.beginPath();
+                    ctx.arc(coilX + i * 16, cy, 38, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // الأميتر الرقمي
+                const amp = Math.abs(d.velocity) < 0.2 ? 0 : Math.max(-2.5, Math.min(2.5, d.velocity * 0.35));
+                drawMeter(ctx, coilX + 48, cy - 95, 'A', `${amp >= 0 && amp > 0 ? '+' : ''}${amp.toFixed(2)} mA`, amp > 0 ? '#059669' : (amp < 0 ? '#e11d48' : '#2563eb'), isDark);
+
+                // الساق المغناطيسية القابلة للسحب
+                const magY = cy - 22;
+                ctx.fillStyle = '#475569';
+                ctx.fillRect(d.magX, magY, 65, 44);
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect(d.magX + 65, magY, 65, 44);
+                ctx.fillStyle = '#fff';
+                ctx.fillText('S', d.magX + 32, magY + 27);
+                ctx.fillText('N', d.magX + 97, magY + 27);
+                ctx.fillStyle = textMuted;
+                ctx.fillText('اسحب الساق المغناطيسية هنا', d.magX + 65, magY + 65);
+
+                drawReadoutBox(ctx, W * 0.5, H - 40, amp === 0 ? 'الساق ساكنة: لا يتغير الفيض المغناطيسي (I_ind = 0)' : (amp > 0 ? 'تزايد الفيض المغناطيسي: ينساب تيار محتث باتجاه معين' : 'تناقص الفيض المغناطيسي: ينساب تيار محتث باتجاه معاكس'), isDark);
+            }
+
+            // 7. حلقة فراداي الحديدية
+            else if (act.simType === 'faraday_ring') {
+                const d = simEngine.data;
+                d.pulse *= 0.92;
+                if (Math.abs(d.pulse) < 0.03) d.pulse = 0;
+
+                const cx = W * 0.5, cy = H * 0.46;
+                // الحلقة الحديدية
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 22;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 85, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // الملف الابتدائي يسار
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 4;
+                for (let i = -3; i <= 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx - 102, cy + i * 14);
+                    ctx.lineTo(cx - 68, cy + i * 14);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = textMain;
+                ctx.fillText('ملف ابتدائي', cx - 155, cy - 30);
+                ctx.fillStyle = d.closed ? '#059669' : '#e11d48';
+                ctx.fillText(d.closed ? 'المفتاح مغلق' : 'المفتاح مفتوح', cx - 155, cy);
+
+                // الملف الثانوي يمين
+                ctx.strokeStyle = '#d97706';
+                for (let i = -3; i <= 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx + 68, cy + i * 14);
+                    ctx.lineTo(cx + 102, cy + i * 14);
+                    ctx.stroke();
+                }
+                drawMeter(ctx, cx + 165, cy, 'G', d.pulse > 0.1 ? 'يمين →' : (d.pulse < -0.1 ? '← يسار' : '0'), '#059669', isDark);
+
+                drawReadoutBox(ctx, cx, H - 40, Math.abs(d.pulse) > 0.1 ? 'لحظة تغير التيار: يتغير الفيض فيتولد تيار محتث في الثانوي!' : 'ثبوت التيار أو انعدامه: لا يحصل تغير في الفيض (المؤشر عند الصفر)', isDark);
+            }
+
+            // 8. نشاط الحث (3 حالات)
+            else if (act.simType === 'em_three_cases') {
+                const d = simEngine.data;
+                const dx = d.objX - d.lastObjX;
+                d.current = d.current * 0.85 + dx * 0.15;
+                d.lastObjX = d.objX;
+                if (Math.abs(d.current) < 0.05) d.current = 0;
+
+                const coilX = W * 0.6, cy = H * 0.48;
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 6;
+                for (let i = 0; i < 6; i++) {
+                    ctx.strokeRect(coilX + i * 18, cy - 45, 10, 90);
+                }
+                ctx.fillStyle = textMain;
+                ctx.fillText('الملف الثانوي الكبير', coilX + 55, cy + 68);
+
+                // الجسم المتحرك (ساق أو ملف ابتدائي)
+                const posX = d.mode === 3 ? coilX + 15 : d.objX;
+                ctx.fillStyle = d.mode === 1 ? '#e11d48' : '#2563eb';
+                ctx.fillRect(posX, cy - 22, 95, 44);
+                ctx.fillStyle = '#fff';
+                ctx.fillText(d.mode === 1 ? 'ساق N-S' : 'ملف ابتدائي', posX + 47, cy + 5);
+
+                drawMeter(ctx, coilX + 55, cy - 95, 'G', d.current > 0.1 ? 'يمين +' : (d.current < -0.1 ? 'يسار -' : '0'), '#059669', isDark);
+                drawReadoutBox(ctx, W * 0.5, H - 40, `المرحلة (${d.mode}): ${Math.abs(d.current) > 0.1 ? 'يتولد تيار محتث نتيجة تغير الفيض المغناطيسي' : 'لا يوجد تغير بالفيض المغناطيسي (المؤشر عند الصفر)'}`, isDark);
+            }
+
+            // 9. التيارات الدوامة والبندولان
+            else if (act.simType === 'eddy_pendulum') {
+                const d = simEngine.data;
+                if (d.released) {
+                    // البندول الكامل يتخامد بسرعة كبيرة داخل المجال
+                    const inField1 = Math.abs(d.angleSolid) < 0.25;
+                    d.velSolid += -0.02 * Math.sin(d.angleSolid);
+                    d.velSolid *= inField1 ? 0.72 : 0.98;
+                    d.angleSolid += d.velSolid;
+
+                    // البندول المقطع يستمر بالاهتزاز بتباطؤ قليل
+                    d.velSlotted += -0.02 * Math.sin(d.angleSlotted);
+                    d.velSlotted *= 0.994;
+                    d.angleSlotted += d.velSlotted;
+                }
+
+                const pivotY = 55;
+                const len = 180;
+                // منطقة المجال المغناطيسي
+                ctx.fillStyle = 'rgba(37, 99, 235, 0.12)';
+                ctx.fillRect(W * 0.25 - 45, pivotY + len - 30, 90, 85);
+                ctx.fillRect(W * 0.75 - 45, pivotY + len - 30, 90, 85);
+                ctx.fillStyle = '#2563eb';
+                ctx.fillText('مجال مغناطيسي B', W * 0.25, pivotY + len + 72);
+                ctx.fillText('مجال مغناطيسي B', W * 0.75, pivotY + len + 72);
+
+                // رسم البندول 1 (كاملة)
+                drawPendulum(ctx, W * 0.25, pivotY, len, d.angleSolid, false, isDark);
+                ctx.fillStyle = textMain;
+                ctx.fillText('صفيحة كاملة (غير مقطعة)', W * 0.25, 32);
+
+                // رسم البندول 2 (مقطعة كالمشط)
+                drawPendulum(ctx, W * 0.75, pivotY, len, d.angleSlotted, true, isDark);
+                ctx.fillStyle = textMain;
+                ctx.fillText('صفيحة مقطعة (كأسنان المشط)', W * 0.75, 32);
+
+                drawReadoutBox(ctx, W * 0.5, H - 35, 'الكاملة تتوقف بسبب التيارات الدوامة الكبيرة، والمقطعة تستمر بالاهتزاز لقلة التيارات الدوامة', isDark);
+            }
+
+            // 10. تأثير المحاثة للملف
+            else if (act.simType === 'inductance_lamps') {
+                const d = simEngine.data;
+                if (d.closed) {
+                    d.iR = Math.min(1, d.iR + 0.15);
+                    d.iL = Math.min(1, d.iL + 0.012); // نمو بطيء بسبب المحاثة
+                }
+                const cx = W * 0.5, cy = H * 0.45;
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(cx - 160, cy - 75, 320, 150);
+                ctx.beginPath();
+                ctx.moveTo(cx - 160, cy);
+                ctx.lineTo(cx + 160, cy);
+                ctx.stroke();
+
+                drawBulb(ctx, cx + 60, cy - 75, 'مصباح المقاومة R', d.iR > 0.7, isDark);
+                drawBulb(ctx, cx + 60, cy, 'مصباح الملف L', d.iL > 0.7, isDark);
+
+                ctx.fillStyle = textMain;
+                ctx.fillText(`نمو تيار المقاومة: ${Math.round(d.iR * 100)}%`, cx - 70, cy - 90);
+                ctx.fillText(`نمو تيار الملف: ${Math.round(d.iL * 100)}%`, cx - 70, cy - 15);
+
+                drawReadoutBox(ctx, cx, H - 35, 'يتأخر توهج المصباح المربوط مع الملف بسبب تولد قوة دافعة كهربائية محتثة ذاتية تعرقل نمو التيار', isDark);
+            }
+
+            // 11. مصباح النيون 80V
+            else if (act.simType === 'neon_inductor') {
+                const d = simEngine.data;
+                if (d.closed) d.coilEnergy = Math.min(1, d.coilEnergy + 0.03);
+                else d.coilEnergy = Math.max(0, d.coilEnergy - 0.05);
+                d.neonFlash = Math.max(0, d.neonFlash - 0.025);
+
+                const cx = W * 0.5, cy = H * 0.45;
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(cx - 160, cy - 70, 320, 140);
+
+                // الملف
+                ctx.fillStyle = '#2563eb';
+                ctx.fillRect(cx - 18, cy - 105, 36, 70);
+                ctx.fillStyle = '#fff';
+                ctx.fillText('ملف L', cx, cy - 65);
+
+                // مصباح النيون على التوازي
+                drawBulb(ctx, cx + 160, cy, 'نيون 80V', d.neonFlash > 0.2, isDark);
+
+                ctx.fillStyle = textMain;
+                ctx.fillText('بطارية 9V', cx - 160, cy - 10);
+                ctx.fillText(d.closed ? 'المفتاح مغلق' : 'المفتاح مفتوح', cx - 80, cy - 85);
+
+                drawReadoutBox(ctx, cx, H - 35, d.neonFlash > 0.2 ? 'توهج ساطع لمصباح النيون لحظة فتح المفتاح بسبب التلاشي السريع للتيار!' : (d.closed ? 'المفتاح مغلق: 9V غير كافية لتوهج النيون (يحتاج 80V)' : 'أغلق المفتاح أولاً ثم افتحه فجأة لملاحظة التوهج'), isDark);
+            }
+
+            // 12-15. أنشطة الفصل الثالث (X_L و X_C)
+            else if (act.simType.startsWith('ac_')) {
+                const d = simEngine.data;
+                const isInd = act.simType.startsWith('ac_xl');
+                const xVal = isInd ? (d.val * 2) : Math.round(5000 / d.val);
+                const iVal = (100 / xVal).toFixed(2);
+
+                // رسم الدائرة يساراً والمنحنى البياني يميناً
+                const leftCx = W * 0.28, cy = H * 0.45;
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(leftCx - 90, cy - 65, 180, 130);
+
+                drawMeter(ctx, leftCx - 90, cy, 'A', `${iVal} A`, '#059669', isDark);
+                drawMeter(ctx, leftCx, cy + 10, 'V', 'ثابت', '#2563eb', isDark);
+
+                ctx.fillStyle = isInd ? '#d97706' : '#0284c7';
+                ctx.fillRect(leftCx - 25, cy - 80, 50, 30);
+                ctx.fillStyle = '#fff';
+                ctx.fillText(isInd ? 'محث L' : 'متسعة C', leftCx, cy - 60);
+
+                // رسم المخطط البياني يميناً
+                const gx = W * 0.58, gy = H * 0.72, gw = W * 0.32, gh = 180;
+                ctx.strokeStyle = textMain;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(gx, gy - gh);
+                ctx.lineTo(gx, gy);
+                ctx.lineTo(gx + gw, gy);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                if (isInd) {
+                    // علاقة طردية خطية
+                    ctx.moveTo(gx, gy);
+                    ctx.lineTo(gx + gw * 0.9, gy - gh * 0.85);
+                } else {
+                    // علاقة عكسية منحنية
+                    for (let px = 15; px <= gw * 0.9; px += 5) {
+                        const py = gy - (2400 / px);
+                        if (px === 15) ctx.moveTo(gx + px, Math.max(gy - gh, py));
+                        else ctx.lineTo(gx + px, Math.max(gy - gh, py));
+                    }
+                }
+                ctx.stroke();
+
+                // نقطة القراءة الحالية على الرسم البياني
+                const normX = (d.val - 20) / 80;
+                const dotX = gx + 15 + normX * (gw * 0.82);
+                const dotY = isInd ? (gy - normX * gh * 0.8) : Math.max(gy - gh + 10, gy - (2400 / (15 + normX * gw * 0.82)));
+                ctx.fillStyle = '#e11d48';
+                ctx.beginPath();
+                ctx.arc(dotX, dotY, 6, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = textMain;
+                ctx.fillText(isInd ? 'رادة الحث X_L (تناسب طردي)' : 'رادة السعة X_C (تناسب عكسي)', gx + gw / 2, gy - gh - 12);
+
+                drawReadoutBox(ctx, W * 0.5, H - 35, `الرادة = ${xVal} Ω   |   قراءة الأميتر I = ${iVal} A   |   قراءة الفولطميتر ثابتة`, isDark);
+            }
+
+            // 16 & 17. الكشف عن الموجات الكهرومغناطيسية
+            else if (act.simType === 'em_detect_e' || act.simType === 'em_detect_b') {
+                const d = simEngine.data;
+                d.wavePhase += 0.08;
+                const tuned = d.capFreq === 100;
+                const cx = W * 0.5, cy = H * 0.45;
+
+                // موجة كهرومغناطيسية قادمة من اليسار
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                for (let x = 40; x < cx - 60; x += 4) {
+                    const y = cy + Math.sin(x * 0.05 - d.wavePhase) * 35;
+                    if (x === 40) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                ctx.fillStyle = textMain;
+                ctx.fillText('موجة كهرومغناطيسية (100 MHz)', 150, cy - 55);
+
+                // الهوائي ودائرة الرنين
+                if (act.simType === 'em_detect_e') {
+                    ctx.strokeStyle = '#059669';
+                    ctx.lineWidth = 5;
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy - 90);
+                    ctx.lineTo(cx, cy + 70);
+                    ctx.stroke();
+                    ctx.fillText('هوائي سلكي', cx, cy - 102);
+                } else {
+                    ctx.strokeStyle = '#059669';
+                    ctx.lineWidth = 5;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy - 20, 48, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.fillText('هوائي حلقي', cx, cy - 80);
+                }
+
+                drawReadoutBox(ctx, cx, H - 40, tuned ? 'حالة الرنين (100 MHz): تم توليف الدائرة واستلام الإشارة بأعظم مقدار!' : `تردد دائرة الرنين الحالي: ${d.capFreq} MHz (غيّر السعة C لمطابقة 100 MHz)`, isDark);
+            }
+
+            // 18. تجربة هرتز
+            else if (act.simType === 'hertz_exp') {
+                const d = simEngine.data;
+                d.spark = Math.max(0, d.spark - 0.02);
+                const cx = W * 0.5, cy = H * 0.45;
+
+                // المرسل يسار
+                ctx.fillStyle = '#2563eb';
+                ctx.beginPath();
+                ctx.arc(cx - 140, cy - 25, 16, 0, Math.PI * 2);
+                ctx.arc(cx - 140, cy + 25, 16, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = textMain;
+                ctx.fillText('دائرة الإرسال (ملف حث)', cx - 140, cy + 65);
+
+                if (d.spark > 0.1) {
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.beginPath();
+                    ctx.arc(cx - 140, cy, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // المستقبل يمين
+                ctx.save();
+                ctx.translate(cx + 140, cy);
+                ctx.rotate((d.rxAngle * Math.PI) / 180);
+                ctx.strokeStyle = '#059669';
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.arc(0, 0, 48, 0.25, Math.PI * 2 - 0.25);
+                ctx.stroke();
+                if (d.spark > 0.1 && d.rxAngle === 0) {
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.beginPath();
+                    ctx.arc(48, 0, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+                ctx.fillStyle = textMain;
+                ctx.fillText('حلقة الاستقبال', cx + 140, cy + 72);
+
+                drawReadoutBox(ctx, cx, H - 35, d.rxAngle === 0 ? 'الفتحة موازية لقطبي المرسل: تتولد شرارة لاسلكية في المستقبل!' : 'الفتحة متعامدة (90°): لا تتولد شرارة في حلقة الاستقبال', isDark);
+            }
+
+            // 19. تداخل الموجات
+            else if (act.simType === 'wave_interference') {
+                const d = simEngine.data;
+                d.t += 0.08;
+                const isConstructive = d.phaseDiff === 0;
+                const cy = H * 0.44;
+
+                // رسم الموجة المحصلة
+                ctx.strokeStyle = isConstructive ? '#059669' : '#e11d48';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                for (let x = 50; x < W - 50; x += 4) {
+                    const y1 = Math.sin(x * 0.04 - d.t) * 35;
+                    const y2 = Math.sin(x * 0.04 - d.t + d.phaseDiff) * 35;
+                    const y = cy + y1 + y2;
+                    if (x === 50) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                drawReadoutBox(ctx, W * 0.5, H - 40, isConstructive ? 'تداخل بنّاء: السعة الناتجة = ضعف سعة الموجة الأصلية (2A)' : 'تداخل إتلافي: السعة الناتجة = صفر (تمحو إحداهما الأخرى)', isDark);
+            }
+
+            // 20. شقي يونك
+            else if (act.simType === 'young_slits') {
+                const d = simEngine.data;
+                const color = d.lambda >= 600 ? '#e11d48' : (d.lambda >= 510 ? '#059669' : '#2563eb');
+                const spacing = Math.round((d.lambda / 650) * 34);
+                const screenX = W * 0.78, cy = H * 0.45;
+
+                // الحاجز ذو الشقين
+                ctx.fillStyle = '#475569';
+                ctx.fillRect(W * 0.25, cy - 110, 10, 85);
+                ctx.fillRect(W * 0.25, cy - 15, 10, 30);
+                ctx.fillRect(W * 0.25, cy + 25, 10, 85);
+
+                // الشاشة والأهداب
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(screenX, cy - 120, 28, 240);
+                for (let i = -4; i <= 4; i++) {
+                    const fy = cy + i * spacing;
+                    if (fy > cy - 115 && fy < cy + 115) {
+                        ctx.fillStyle = color;
+                        ctx.fillRect(screenX + 2, fy - 5, 24, 10);
+                    }
+                }
+
+                drawReadoutBox(ctx, W * 0.5, H - 35, `تتكون أهداب مضيئة ومظلمة متعاقبة • الطول الموجي λ = ${d.lambda} nm`, isDark);
+            }
+
+            // 21. حيود الضوء
+            else if (act.simType === 'light_diffraction') {
+                const d = simEngine.data;
+                const cx = W * 0.5, cy = H * 0.44;
+                // اللوح الأسود
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(cx - 140, cy - 85, 280, 170);
+
+                if (d.scratched) {
+                    // الشق الرفيع ونمط الحيود
+                    ctx.fillStyle = '#e11d48';
+                    ctx.fillRect(cx - 2, cy - 75, 4, 150);
+                    // الأهداب المضيئة
+                    ctx.fillStyle = 'rgba(225, 29, 72, 0.85)';
+                    ctx.fillRect(cx - 28, cy - 60, 56, 120); // مركزي عريض
+                    ctx.fillStyle = 'rgba(225, 29, 72, 0.45)';
+                    ctx.fillRect(cx - 58, cy - 45, 18, 90);
+                    ctx.fillRect(cx + 40, cy - 45, 18, 90);
+                } else {
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText('اسحب الدبوس على اللوح لعمل شق رفيع', cx, cy);
+                }
+                drawReadoutBox(ctx, cx, H - 35, d.scratched ? 'الهدب المركزي عريض وشديد الإضاءة وتقل شدة الأهداب بالابتعاد عنه' : 'لوح زجاجي مطلي بالدهان الأسود', isDark);
+            }
+
+            // 22 & 23. استقطاب الضوء
+            else if (act.simType === 'polarization_tourmaline') {
+                const d = simEngine.data;
+                const rad = (d.angle * Math.PI) / 180;
+                const intensity = Math.pow(Math.cos(rad), 2);
+                const cx = W * 0.5, cy = H * 0.44;
+
+                // المستقطب والمحلل
+                ctx.fillStyle = 'rgba(5, 150, 105, 0.3)';
+                ctx.strokeStyle = '#059669';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.ellipse(cx - 60, cy, 24, 65, 0, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+                ctx.fillStyle = textMain;
+                ctx.fillText('المستقطب', cx - 60, cy + 85);
+
+                ctx.fillStyle = 'rgba(37, 99, 235, 0.3)';
+                ctx.strokeStyle = '#2563eb';
+                ctx.beginPath();
+                ctx.ellipse(cx + 60, cy, 24, 65, 0, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+                ctx.fillText(`المحلل (${d.angle}°)`, cx + 60, cy + 85);
+
+                // بقعة الضوء النافذ
+                ctx.fillStyle = `rgba(245, 158, 11, ${intensity})`;
+                ctx.beginPath();
+                ctx.arc(cx + 170, cy, 32, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#d97706';
+                ctx.stroke();
+
+                drawReadoutBox(ctx, cx, H - 35, `شدة الضوء النافذ = ${Math.round(intensity * 100)}%   ${d.angle === 90 ? '(حجب المحلل الضوء المستقطب بالكامل!)' : ''}`, isDark);
+            }
+
+            // 24. استقطاب الحبل
+            else if (act.simType === 'rope_polarization') {
+                const d = simEngine.data;
+                d.t += 0.1;
+                const cx = W * 0.5, cy = H * 0.44;
+
+                // الحاجز
+                ctx.fillStyle = '#64748b';
+                ctx.fillRect(cx - 10, cy - 85, 20, 170);
+                ctx.fillStyle = isDark ? '#0f172a' : '#f8fafc';
+                if (d.vertical) ctx.fillRect(cx - 4, cy - 55, 8, 110);
+                else ctx.fillRect(cx - 10, cy - 6, 20, 12);
+
+                // الحبل
+                ctx.strokeStyle = '#e11d48';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                for (let x = 60; x < W - 60; x += 4) {
+                    const amp = (!d.vertical && x > cx) ? 0 : 32;
+                    const y = cy + Math.sin(x * 0.05 - d.t) * amp;
+                    if (x === 60) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                drawReadoutBox(ctx, cx, H - 35, d.vertical ? 'الشق عمودي: تمر الموجة المستعرضة في الحبل بحرية' : 'الشق أفقي: تُحجب الموجة المستعرضة ولا تمر!', isDark);
+            }
+
+            // 25. الظاهرة الكهروضوئية
+            else if (act.simType === 'photoelectric') {
+                const d = simEngine.data;
+                d.t += 2.5;
+                const cx = W * 0.5, cy = H * 0.44;
+                let curr = 0;
+                if (d.intensity > 0 && d.voltage > -2) {
+                    const maxI = d.intensity === 2 ? 4.0 : 2.0;
+                    curr = d.voltage >= 1 ? maxI : maxI * ((d.voltage + 2) / 3);
+                }
+
+                // الأنبوبة المفرغة
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(cx - 140, cy - 55, 280, 110);
+
+                // الباعث E والجامع C
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(cx + 100, cy - 40, 10, 80);
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect(cx - 110, cy - 40, 10, 80);
+                ctx.fillStyle = textMain;
+                ctx.fillText('الباعث E', cx + 105, cy - 50);
+                ctx.fillText('الجامع C', cx - 105, cy - 50);
+
+                // الإلكترونات الضوئية
+                if (curr > 0) {
+                    const count = d.intensity * 3;
+                    ctx.fillStyle = '#2563eb';
+                    for (let i = 0; i < count; i++) {
+                        const ex = cx + 90 - ((d.t + i * 35) % 190);
+                        const ey = cy - 22 + (i % 3) * 22;
+                        ctx.beginPath();
+                        ctx.arc(ex, ey, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                drawReadoutBox(ctx, cx, H - 35, `التيار الكهروضوئي = ${curr.toFixed(1)} mA   |   فرق الجهد ΔV = ${d.voltage} V   |   جهد الإيقاف V_s = -2.0 V`, isDark);
+            }
+
+            // 26. أنواع الأطياف
+            else if (act.simType === 'spectra_prism') {
+                const d = simEngine.data;
+                const cx = W * 0.5, cy = H * 0.44;
+
+                // أنبوب الغاز
+                const srcColors = { H: '#ec4899', Ne: '#f97316', Hg: '#06b6d4', Lamp: '#facc15' };
+                const srcNames = { H: 'غاز الهيدروجين', Ne: 'غاز النيون', Hg: 'بخار الزئبق', Lamp: 'مصباح خويطي' };
+                ctx.fillStyle = srcColors[d.source];
+                ctx.fillRect(cx - 210, cy - 45, 22, 90);
+                ctx.fillStyle = textMain;
+                ctx.fillText(srcNames[d.source], cx - 199, cy + 68);
+
+                // الموشور الزجاجي
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
+                ctx.strokeStyle = '#0284c7';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(cx - 20, cy - 55);
+                ctx.lineTo(cx - 75, cy + 50);
+                ctx.lineTo(cx + 35, cy + 50);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+                ctx.fillStyle = textMain;
+                ctx.fillText('موشور', cx - 20, cy + 72);
+
+                // الشاشة والطيف
+                const sx = cx + 150;
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(sx, cy - 75, 45, 150);
+
+                if (d.source === 'Lamp') {
+                    const grad = ctx.createLinearGradient(0, cy - 70, 0, cy + 70);
+                    grad.addColorStop(0, '#ef4444');
+                    grad.addColorStop(0.25, '#eab308');
+                    grad.addColorStop(0.5, '#22c55e');
+                    grad.addColorStop(0.75, '#3b82f6');
+                    grad.addColorStop(1, '#a855f7');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(sx + 5, cy - 70, 35, 140);
+                } else {
+                    const palettes = {
+                        H: ['#ef4444', '#22d3ee', '#6366f1', '#a855f7'],
+                        Ne: ['#dc2626', '#f97316', '#facc15', '#4ade80'],
+                        Hg: ['#eab308', '#22c55e', '#3b82f6', '#9333ea']
+                    };
+                    palettes[d.source].forEach((col, i) => {
+                        ctx.fillStyle = col;
+                        ctx.fillRect(sx + 5, cy - 50 + i * 32, 35, 5);
+                    });
+                }
+
+                drawReadoutBox(ctx, cx, H - 35, d.source === 'Lamp' ? 'طيف مستمر: يحتوي على مدى واسع من الأطوال الموجية المتصلة' : `طيف انبعاث خطي براق لـ (${srcNames[d.source]}) يختلف باختلاف نوع الغاز`, isDark);
+            }
+        }
+
+        // دوال مساعدة للرسم على الـ Canvas
+        function drawMeter(ctx, x, y, symbol, text, color, isDark) {
+            ctx.fillStyle = isDark ? '#1e293b' : '#ffffff';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y, 26, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 14px Cairo, sans-serif';
+            ctx.fillText(symbol, x, y - 3);
+            ctx.font = 'bold 11px Courier New, monospace';
+            ctx.fillText(text, x, y + 13);
+            ctx.font = 'bold 14px Cairo, sans-serif';
+        }
+
+        function drawBulb(ctx, x, y, label, isLit, isDark) {
+            ctx.fillStyle = isLit ? '#facc15' : (isDark ? '#334155' : '#cbd5e1');
+            ctx.beginPath();
+            ctx.arc(x, y, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = isLit ? '#ca8a04' : '#64748b';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = isDark ? '#e2e8f0' : '#1e293b';
+            ctx.font = 'bold 12px Cairo, sans-serif';
+            ctx.fillText(label, x, y + 34);
+            ctx.font = 'bold 14px Cairo, sans-serif';
+        }
+
+        function drawPendulum(ctx, px, py, len, angle, isSlotted, isDark) {
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(angle);
+            ctx.strokeStyle = isDark ? '#94a3b8' : '#475569';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, len);
+            ctx.stroke();
+
+            if (!isSlotted) {
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillRect(-22, len, 44, 52);
+            } else {
+                ctx.fillStyle = '#059669';
+                ctx.fillRect(-22, len, 44, 10);
+                for (let i = -22; i <= 14; i += 12) {
+                    ctx.fillRect(i, len + 10, 7, 42);
+                }
+            }
+            ctx.restore();
+        }
+
+        function drawReadoutBox(ctx, cx, y, text, isDark) {
+            ctx.font = 'bold 13px Cairo, sans-serif';
+            const w = Math.min(ctx.measureText(text).width + 36, ctx.canvas.getBoundingClientRect().width - 24);
+            ctx.fillStyle = isDark ? 'rgba(30, 41, 59, 0.92)' : 'rgba(239, 246, 255, 0.95)';
+            ctx.strokeStyle = isDark ? '#334155' : '#bfdbfe';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.roundRect(cx - w / 2, y - 18, w, 34, 10);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = isDark ? '#93c5fd' : '#1e3a8a';
+            ctx.fillText(text, cx, y + 4);
+        }
+    </script>
 </body>
 </html>
