@@ -239,22 +239,22 @@
                 </div>
             </div>
 
-            <!-- شريط البحث -->
-            <div class="mt-3 relative">
-                <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                <input type="text" id="searchInput"
-                    placeholder="ابحث عن أي نشاط، أداة، أو استنتاج (مثال: فراداي، العازل، النيون، التيارات الدوامة، يونك، الأطياف)..."
-                    class="w-full pr-10 pl-20 py-2.5 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-600 transition">
-                <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute left-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200">
-                    مسح
-                </button>
+            <!-- شريط الوصول السريع لتجارب الفصل الثاني المميزة -->
+            <div class="mt-2.5 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                <span class="shrink-0 text-[11px] font-extrabold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>تجارب الفصل الثاني المطوّرة:</span>
+                </span>
+                <button onclick="quickOpenCh2('ch2_1')" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 transition">1. الساق والأميتر الرقمي</button>
+                <button onclick="quickOpenCh2('ch2_2')" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 transition">2. حلقة فراداي الحديدية</button>
+                <button onclick="quickOpenCh2('ch2_3')" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 transition">3. الحث (3 حالات)</button>
+                <button onclick="quickOpenCh2('ch2_4')" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 transition">4. التيارات الدوامة</button>
+                <button onclick="quickOpenCh2('ch2_5')" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 transition">5أ. محاثة الملف</button>
+                <button onclick="quickOpenCh2('ch2_6')" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 transition">5ب. مصباح النيون 80V</button>
             </div>
 
-            <!-- تبويبات الفصول -->
-            <div id="chapterTabs" class="mt-3 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-                <!-- يتم توليدها ديناميكياً -->
-            </div>
-        </div>
+            <!-- شريط البحث -->
+            <div class="mt-2.5 relative">
     </header>
 
     <!-- ==================== 3. المحتوى الرئيسي: مساحة المختبر + قائمة الأنشطة ==================== -->
@@ -909,7 +909,7 @@
         let appState = {
             selectedChapter: 'all',
             searchQuery: '',
-            activeActivityId: 'ch1_1',
+            activeActivityId: 'ch2_1',
             completedIds: JSON.parse(localStorage.getItem('ghazwan_physics_completed') || '[]'),
             globalQuizMode: false,
             revealedIds: {},
@@ -917,33 +917,15 @@
             isFullscreen: false
         };
 
-        // متغيرات المحاكاة الحية على الـ Canvas
-        let simEngine = {
-            animId: null,
-            data: {},
-            draggingItem: null,
-            dragOffset: { x: 0, y: 0 }
-        };
-
-        // تهيئة التطبيق
-        document.addEventListener('DOMContentLoaded', () => {
+        // الوصول السريع لأي تجربة من تجارب الفصل الثاني
+        function quickOpenCh2(actId) {
+            appState.selectedChapter = 'ch2';
+            appState.activeActivityId = actId;
             renderChapterTabs();
             renderActivitiesList();
             renderWorkspace();
-            updateProgressUI();
-
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', (e) => {
-                appState.searchQuery = e.target.value.trim();
-                document.getElementById('clearSearchBtn').classList.toggle('hidden', !appState.searchQuery);
-                renderActivitiesList();
-            });
-        });
-
-        // دوال شاشة المقدمة
-        function enterLab() {
-            const intro = document.getElementById('introScreen');
-            intro.classList.add('intro-hidden');
+            const ws = document.getElementById('workspaceContainer');
+            if (ws) ws.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         function showIntro() {
             const intro = document.getElementById('introScreen');
@@ -1369,18 +1351,124 @@
 
                 case 'em_magnet_coil':
                     simEngine.data = {
-                        magX: W0 * 0.22,
-                        lastMagX: W0 * 0.22,
+                        magX: W0 * 0.16,
+                        lastMagX: W0 * 0.16,
                         velocity: 0,
-                        current: 0
+                        ampReading: 0,
+                        chargePhase: 0,
+                        autoDir: 0
                     };
                     controlsBar.innerHTML = `
                         <div class="flex flex-wrap items-center justify-between gap-3">
-                            <span class="text-xs text-slate-600 dark:text-slate-300">اسحب الساق المغناطيسية بسرعة يميناً ويساراً أمام الملف أو داخله!</span>
-                            <div class="flex gap-2">
-                                <button onclick="autoMoveMagnet(1)" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold">تقريب تلقائي →</button>
-                                <button onclick="autoMoveMagnet(-1)" class="px-3 py-1.5 rounded-lg bg-blue-700 text-white text-xs font-bold">← إبعاد تلقائي</button>
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">اسحب الساق المغناطيسية يميناً ويساراً بموازاة محور الملف:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="simEngine.data.autoDir=1" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition">تقريب نحو الملف →</button>
+                                <button onclick="simEngine.data.autoDir=0" class="px-3.5 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-extrabold transition">إيقاف (سكون)</button>
+                                <button onclick="simEngine.data.autoDir=-1" class="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold transition">← إبعاد عن الملف</button>
                             </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'faraday_ring':
+                    simEngine.data = {
+                        closed: false,
+                        fluxLevel: 0,
+                        needlePos: 0,
+                        needleVel: 0,
+                        dPhiDt: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-center gap-3">
+                            <button onclick="simEngine.data.closed=true" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition">
+                                <i class="fa-solid fa-toggle-on ml-1"></i>إغلاق مفتاح الابتدائي (نمو الفيض)
+                            </button>
+                            <button onclick="simEngine.data.closed=false" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-sm transition">
+                                <i class="fa-solid fa-toggle-off ml-1"></i>فتح مفتاح الابتدائي (تلاشي الفيض)
+                            </button>
+                        </div>
+                    `;
+                    break;
+
+                case 'em_three_cases':
+                    simEngine.data = {
+                        mode: 1, // 1: ساق ومف، 2: ملفان متحركان، 3: ملفان ثابتان ومفتاح
+                        objY: 65,
+                        lastObjY: 65,
+                        closed: false,
+                        fluxInCoil: 0,
+                        needlePos: 0,
+                        needleVel: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex flex-wrap gap-1.5">
+                                <button id="btn_c3_1" onclick="setCase3Mode(1)" class="px-3 py-1.5 rounded-xl bg-blue-700 text-white text-xs font-extrabold">أولاً: ساق مغناطيسية</button>
+                                <button id="btn_c3_2" onclick="setCase3Mode(2)" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-extrabold">ثانياً: ملفان متحركان</button>
+                                <button id="btn_c3_3" onclick="setCase3Mode(3)" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-extrabold">ثالثاً: ملفان ومفتاح</button>
+                            </div>
+                            <button id="btn_c3_sw" onclick="toggleCase3Switch()" class="hidden px-4 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold">إغلاق / فتح المفتاح</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'eddy_pendulum':
+                    simEngine.data = {
+                        angleSolid: 0.72,
+                        velSolid: 0,
+                        angleSlotted: 0.72,
+                        velSlotted: 0,
+                        released: false,
+                        eddyPhase: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-center gap-3">
+                            <button onclick="resetEddyPendulums()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-extrabold">
+                                <i class="fa-solid fa-hand-back-fist ml-1"></i>إزاحة الصفيحتين معاً
+                            </button>
+                            <button onclick="simEngine.data.released=true" class="px-5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-extrabold shadow-sm">
+                                <i class="fa-solid fa-play ml-1"></i>إفلات الصفيحتين في آنٍ واحد!
+                            </button>
+                        </div>
+                    `;
+                    break;
+
+                case 'inductance_lamps':
+                    simEngine.data = {
+                        closed: false,
+                        iR: 0,
+                        iL: 0,
+                        curveR: [],
+                        curveL: []
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-center gap-3">
+                            <button onclick="simEngine.data.closed=true" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm">
+                                <i class="fa-solid fa-power-off ml-1"></i>إغلاق المفتاح الكهربائي
+                            </button>
+                            <button onclick="resetInductanceLamps()" class="px-5 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-extrabold">
+                                <i class="fa-solid fa-rotate-left ml-1"></i>فتح المفتاح وإعادة التجربة
+                            </button>
+                        </div>
+                    `;
+                    break;
+
+                case 'neon_inductor':
+                    simEngine.data = {
+                        closed: false,
+                        coilCurrent: 0,
+                        coilVoltage: 0,
+                        neonGlow: 0,
+                        flashTimer: 0
+                    };
+                    controlsBar.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-center gap-3">
+                            <button onclick="closeNeonCircuit()" class="px-5 py-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-extrabold shadow-sm">
+                                1. إغلاق المفتاح (تجهيز 9V)
+                            </button>
+                            <button onclick="openNeonCircuit()" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold shadow-sm">
+                                2. فتح المفتاح فجأة (تلاشي سريع وتوهج 80V!)
+                            </button>
                         </div>
                     `;
                     break;
@@ -1673,11 +1761,54 @@
             else simEngine.data.current = 0;
         }
 
-        function autoMoveMagnet(dir) {
-            const canvas = document.getElementById('labCanvas');
-            if (!canvas) return;
-            const W = canvas.getBoundingClientRect().width;
-            simEngine.data.magX = dir === 1 ? W * 0.52 : W * 0.18;
+        function setCase3Mode(m) {
+            simEngine.data.mode = m;
+            simEngine.data.objY = m === 3 ? 195 : 65;
+            simEngine.data.lastObjY = simEngine.data.objY;
+            simEngine.data.closed = false;
+            [1, 2, 3].forEach(idx => {
+                const btn = document.getElementById(`btn_c3_${idx}`);
+                if (btn) {
+                    btn.className = idx === m
+                        ? 'px-3 py-1.5 rounded-xl bg-blue-700 text-white text-xs font-extrabold'
+                        : 'px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-extrabold';
+                }
+            });
+            const swBtn = document.getElementById('btn_c3_sw');
+            if (swBtn) swBtn.classList.toggle('hidden', m !== 3);
+        }
+
+        function toggleCase3Switch() {
+            simEngine.data.closed = !simEngine.data.closed;
+        }
+
+        function resetEddyPendulums() {
+            simEngine.data.angleSolid = 0.72;
+            simEngine.data.angleSlotted = 0.72;
+            simEngine.data.velSolid = 0;
+            simEngine.data.velSlotted = 0;
+            simEngine.data.released = false;
+        }
+
+        function resetInductanceLamps() {
+            simEngine.data.closed = false;
+            simEngine.data.iR = 0;
+            simEngine.data.iL = 0;
+            simEngine.data.curveR = [];
+            simEngine.data.curveL = [];
+        }
+
+        function closeNeonCircuit() {
+            simEngine.data.closed = true;
+            simEngine.data.neonGlow = 0;
+        }
+
+        function openNeonCircuit() {
+            if (simEngine.data.closed && simEngine.data.coilCurrent > 0.25) {
+                simEngine.data.neonGlow = 1.0;
+                simEngine.data.coilVoltage = 95;
+            }
+            simEngine.data.closed = false;
         }
 
         function toggleFaradaySwitch(close) {
@@ -1715,23 +1846,26 @@
                     setCapSwitch(next);
                 } else if (act.simType === 'em_magnet_coil') {
                     simEngine.draggingItem = 'magnet';
+                    simEngine.data.autoDir = 0;
                     simEngine.dragOffset.x = p.x - simEngine.data.magX;
                 } else if (act.simType === 'faraday_ring') {
-                    toggleFaradaySwitch(!simEngine.data.closed);
+                    simEngine.data.closed = !simEngine.data.closed;
                 } else if (act.simType === 'em_three_cases') {
                     if (simEngine.data.mode === 3) {
                         simEngine.data.closed = !simEngine.data.closed;
-                        simEngine.data.current = simEngine.data.closed ? 1 : -1;
                     } else {
                         simEngine.draggingItem = 'obj3';
-                        simEngine.dragOffset.x = p.x - simEngine.data.objX;
+                        simEngine.dragOffset.y = p.y - simEngine.data.objY;
                     }
                 } else if (act.simType === 'eddy_pendulum') {
                     simEngine.draggingItem = 'pendulum';
                     simEngine.data.released = false;
+                } else if (act.simType === 'inductance_lamps') {
+                    if (simEngine.data.closed) resetInductanceLamps();
+                    else simEngine.data.closed = true;
                 } else if (act.simType === 'neon_inductor') {
-                    if (simEngine.data.closed) simEngine.data.neonFlash = 1.0;
-                    simEngine.data.closed = !simEngine.data.closed;
+                    if (simEngine.data.closed) openNeonCircuit();
+                    else closeNeonCircuit();
                 } else if (act.simType === 'ac_xl_l' || act.simType === 'ac_xc_c') {
                     simEngine.draggingItem = 'core';
                 } else if (act.simType === 'polarization_tourmaline') {
@@ -1762,29 +1896,628 @@
                     const center = W * 0.45;
                     simEngine.data.dist = Math.max(55, Math.min(180, p.x - center));
                 } else if (simEngine.draggingItem === 'magnet') {
-                    simEngine.data.magX = Math.max(40, Math.min(W * 0.62, p.x - simEngine.dragOffset.x));
+                    simEngine.data.magX = Math.max(30, Math.min(W * 0.56, p.x - simEngine.dragOffset.x));
                 } else if (simEngine.draggingItem === 'obj3') {
-                    simEngine.data.objX = Math.max(40, Math.min(W * 0.58, p.x - simEngine.dragOffset.x));
+                    simEngine.data.objY = Math.max(35, Math.min(205, p.y - simEngine.dragOffset.y));
                 } else if (simEngine.draggingItem === 'pendulum') {
-                    const ang = Math.max(-0.8, Math.min(0.8, (p.x - W * 0.5) / 180));
+                    const ang = Math.max(-0.82, Math.min(0.82, (p.x - W * 0.5) / 210));
                     simEngine.data.angleSolid = ang;
                     simEngine.data.angleSlotted = ang;
                 } else if (simEngine.draggingItem === 'core') {
-                    const pct = Math.max(20, Math.min(100, Math.round((p.x / (W * 0.6)) * 100)));
-                    simEngine.data.val = pct;
-                    const slider = document.getElementById('ctrl_ac');
-                    if (slider) slider.value = pct;
-                } else if (simEngine.draggingItem === 'pol') {
-                    const deg = Math.max(0, Math.min(90, Math.round((p.y / H) * 90)));
-                    simEngine.data.angle = deg;
-                    const slider = document.getElementById('ctrl_pol');
-                    if (slider) slider.value = deg;
-                    const lbl = document.getElementById('lbl_pol');
-                    if (lbl) lbl.textContent = `${deg}°`;
-                } else if (simEngine.draggingItem === 'pin') {
-                    simEngine.data.pinX = p.x;
-                    if (Math.abs(p.x - W * 0.5) < 40) simEngine.data.scratched = true;
+            // 6. نشاط 1 (ف2): ساق مغناطيسية وملف وأميتر رقمي
+            else if (act.simType === 'em_magnet_coil') {
+                const d = simEngine.data;
+                if (d.autoDir !== 0) {
+                    d.magX += d.autoDir * 3.2;
+                    if (d.magX > W * 0.54) d.autoDir = -1;
+                    if (d.magX < W * 0.14) d.autoDir = 1;
                 }
+
+                const dx = d.magX - d.lastMagX;
+                d.velocity = d.velocity * 0.82 + dx * 0.25;
+                d.lastMagX = d.magX;
+                const amp = Math.abs(d.velocity) < 0.12 ? 0 : Math.max(-2.4, Math.min(2.4, d.velocity * 0.42));
+                d.ampReading = amp;
+                d.chargePhase += amp * 0.08;
+
+                const coilX = W * 0.58;
+                const cy = H * 0.52;
+                const magY = cy - 24;
+                const magW = 140, magH = 48;
+
+                // رسم خطوط الفيض المغناطيسي الديناميكية المنحنية من N إلى S
+                const nPoleX = d.magX + magW;
+                const sPoleX = d.magX;
+                ctx.save();
+                ctx.strokeStyle = 'rgba(225, 29, 72, 0.38)';
+                ctx.lineWidth = 1.8;
+                for (let k = -3; k <= 3; k++) {
+                    if (k === 0) {
+                        // خط المحور المركزي
+                        ctx.beginPath();
+                        ctx.moveTo(nPoleX, cy);
+                        ctx.lineTo(nPoleX + 195, cy);
+                        ctx.stroke();
+                        drawArrowHead(ctx, nPoleX + 185, cy, 0, '#e11d48');
+                    } else {
+                        const spread = k * 34;
+                        ctx.beginPath();
+                        ctx.moveTo(nPoleX, cy + k * 5);
+                        ctx.bezierCurveTo(
+                            nPoleX + 120, cy + spread * 1.1,
+                            nPoleX + 90, cy + spread * 2.1,
+                            (nPoleX + sPoleX) / 2, cy + spread * 2.1
+                        );
+                        ctx.stroke();
+                    }
+                }
+                ctx.fillStyle = '#e11d48';
+                ctx.font = 'bold 13px Courier New';
+                ctx.fillText('B⃗', nPoleX + 198, cy - 8);
+                ctx.restore();
+
+                // رسم الأسلاك الواصلة للأميتر الرقمي في الأعلى
+                const meterX = coilX + 64, meterY = cy - 125;
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                ctx.moveTo(coilX + 10, cy - 42);
+                ctx.lineTo(coilX + 10, meterY);
+                ctx.lineTo(meterX - 58, meterY);
+                ctx.moveTo(coilX + 118, cy - 42);
+                ctx.lineTo(coilX + 118, meterY);
+                ctx.lineTo(meterX + 58, meterY);
+                ctx.stroke();
+
+                // أسهم اتجاه التيار المحتث في السلكين (تيار إلى الأعلى / تيار إلى الأسفل)
+                if (Math.abs(amp) > 0.05) {
+                    const goingIn = amp > 0;
+                    ctx.fillStyle = goingIn ? '#059669' : '#2563eb';
+                    ctx.font = 'bold 12px Cairo, sans-serif';
+                    // السلك الأيسر
+                    drawArrowHead(ctx, coilX + 10, cy - 82, goingIn ? -Math.PI / 2 : Math.PI / 2, ctx.fillStyle);
+                    ctx.fillText(goingIn ? 'تيار إلى الأعلى I' : 'تيار إلى الأسفل I', coilX - 48, cy - 78);
+                    // السلك الأيمن
+                    drawArrowHead(ctx, coilX + 118, cy - 82, goingIn ? Math.PI / 2 : -Math.PI / 2, ctx.fillStyle);
+                    ctx.fillText(goingIn ? 'تيار إلى الأسفل I' : 'تيار إلى الأعلى I', coilX + 178, cy - 78);
+                }
+
+                // رسم جهاز الأميتر الرقمي الواقعي
+                ctx.fillStyle = isDark ? '#1e293b' : '#e2e8f0';
+                ctx.strokeStyle = '#0284c7';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.roundRect(meterX - 58, meterY - 34, 116, 68, 12);
+                ctx.fill(); ctx.stroke();
+                // شاشة LCD
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(meterX - 46, meterY - 22, 92, 32);
+                ctx.fillStyle = amp > 0 ? '#34d399' : (amp < 0 ? '#fb7185' : '#38bdf8');
+                ctx.font = 'bold 19px Courier New, monospace';
+                ctx.fillText(`${amp > 0 ? '+' : ''}${amp.toFixed(2)}`, meterX, meterY);
+                ctx.fillStyle = textMuted;
+                ctx.font = 'bold 11px Cairo, sans-serif';
+                ctx.fillText('أميتر رقمي (mA)', meterX, meterY + 25);
+
+                // رسم أسطوانة الملف وحلقاته النحاسية
+                ctx.fillStyle = isDark ? '#334155' : '#cbd5e1';
+                ctx.beginPath();
+                ctx.roundRect(coilX, cy - 42, 128, 84, 10);
+                ctx.fill();
+                ctx.strokeStyle = '#b45309';
+                ctx.lineWidth = 5;
+                for (let i = 0; i < 7; i++) {
+                    const lx = coilX + 10 + i * 18;
+                    ctx.beginPath();
+                    ctx.ellipse(lx, cy, 7, 44, 0, -Math.PI * 0.55, Math.PI * 0.55);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = textMain;
+                ctx.font = 'bold 13px Cairo, sans-serif';
+                ctx.fillText('ملف موصل', coilX + 64, cy + 66);
+
+                // رسم الساق المغناطيسية القابلة للسحب
+                ctx.shadowColor = 'rgba(0,0,0,0.15)';
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = '#475569';
+                ctx.beginPath();
+                ctx.roundRect(d.magX, magY, magW / 2, magH, [10, 0, 0, 10]);
+                ctx.fill();
+                ctx.fillStyle = '#e11d48';
+                ctx.beginPath();
+                ctx.roundRect(d.magX + magW / 2, magY, magW / 2, magH, [0, 10, 10, 0]);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 18px Courier New, monospace';
+                ctx.fillText('S', d.magX + magW * 0.25, cy + 6);
+                ctx.fillText('N', d.magX + magW * 0.75, cy + 6);
+                ctx.fillStyle = textMuted;
+                ctx.font = 'bold 12px Cairo, sans-serif';
+                ctx.fillText('← اسحب المغناطيس هنا →', d.magX + magW / 2, magY + magH + 22);
+
+                drawReadoutBox(ctx, W * 0.5, H - 35,
+                    amp === 0
+                        ? 'الساق ساكنة: لا يتغير الفيض المغناطيسي (ΔΦ_B / Δt = 0) ⇐ التيار المحتث = 0.00'
+                        : (amp > 0
+                            ? 'اقتراب الساق: تزايد الفيض المغناطيسي المخترق للملف ⇐ ينساب تيار محتث (+)'
+                            : 'ابتعاد الساق: تناقص الفيض المغناطيسي المخترق للملف ⇐ ينساب تيار محتث معاكس (-)')
+                , isDark);
+            }
+
+            // 7. نشاط 2 (ف2): اكتشاف واستنتاج فراداي (الحلقة الحديدية المقفلة)
+            else if (act.simType === 'faraday_ring') {
+                const d = simEngine.data;
+                const targetFlux = d.closed ? 1.0 : 0.0;
+                const prevFlux = d.fluxLevel;
+                d.fluxLevel += (targetFlux - d.fluxLevel) * 0.065;
+                d.dPhiDt = (d.fluxLevel - prevFlux) * 28;
+
+                // حركة مؤشر الكلفانوميتر الفيزيائية (تخامد توافقي)
+                const targetNeedle = Math.max(-1, Math.min(1, d.dPhiDt));
+                d.needleVel += (targetNeedle - d.needlePos) * 0.22;
+                d.needleVel *= 0.76;
+                d.needlePos += d.needleVel;
+
+                const cx = W * 0.5, cy = H * 0.46;
+
+                // الحلقة المقفلة من الحديد المطاوع
+                ctx.strokeStyle = isDark ? '#475569' : '#94a3b8';
+                ctx.lineWidth = 28;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 92, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // خطوط الفيض المغناطيسي المتولدة داخل حلقة الحديد المطاوع
+                if (d.fluxLevel > 0.02) {
+                    ctx.save();
+                    ctx.strokeStyle = `rgba(225, 29, 72, ${d.fluxLevel * 0.85})`;
+                    ctx.lineWidth = 2.5;
+                    ctx.setLineDash([10, 8]);
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 86, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 98, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                // دائرة الملف الابتدائي (يسار)
+                const leftX = cx - 235;
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(cx - 92, cy - 45);
+                ctx.lineTo(leftX, cy - 45);
+                ctx.lineTo(leftX, cy + 45);
+                ctx.lineTo(cx - 92, cy + 45);
+                ctx.stroke();
+
+                // بطارية ومفتاح تفاعلي في الابتدائي
+                ctx.fillStyle = isDark ? '#0f172a' : '#f8fafc';
+                ctx.fillRect(leftX - 15, cy - 18, 30, 36);
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect(leftX - 14, cy - 10, 28, 4);
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(leftX - 8, cy + 6, 16, 4);
+                ctx.fillStyle = textMain;
+                ctx.font = 'bold 12px Cairo, sans-serif';
+                ctx.fillText('بطارية', leftX - 36, cy + 4);
+
+                // المفتاح في الفرع العلوي
+                ctx.fillStyle = isDark ? '#0f172a' : '#f8fafc';
+                ctx.fillRect(cx - 190, cy - 55, 52, 20);
+                ctx.strokeStyle = d.closed ? '#059669' : '#e11d48';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(cx - 185, cy - 45);
+                if (d.closed) ctx.lineTo(cx - 142, cy - 45);
+                else ctx.lineTo(cx - 148, cy - 68);
+                ctx.stroke();
+                ctx.fillStyle = d.closed ? '#059669' : '#e11d48';
+                ctx.fillText(d.closed ? 'المفتاح مغلق' : 'المفتاح مفتوح', cx - 165, cy - 72);
+
+                // لفات الملف الابتدائي
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 5;
+                for (let i = -3; i <= 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx - 108, cy + i * 13);
+                    ctx.lineTo(cx - 76, cy + i * 13);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = textMain;
+                ctx.fillText('دائرة الملف الابتدائي', cx - 165, cy + 72);
+
+                // لفات الملف الثانوي (يمين) والكلفانوميتر ذو المؤشر
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 5;
+                for (let i = -3; i <= 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx + 76, cy + i * 13);
+                    ctx.lineTo(cx + 108, cy + i * 13);
+                    ctx.stroke();
+                }
+                const rightX = cx + 215;
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(cx + 92, cy - 45);
+                ctx.lineTo(rightX, cy - 45);
+                ctx.lineTo(rightX, cy + 45);
+                ctx.lineTo(cx + 92, cy + 45);
+                ctx.stroke();
+
+                drawGalvanometer(ctx, rightX, cy, d.needlePos, isDark);
+                ctx.fillStyle = textMain;
+                ctx.fillText('دائرة الملف الثانوي', cx + 165, cy + 72);
+                ctx.fillStyle = textMuted;
+                ctx.fillText('حلقة مقفلة من الحديد المطاوع', cx, cy + 125);
+
+                drawReadoutBox(ctx, cx, H - 35,
+                    Math.abs(d.needlePos) > 0.08
+                        ? (d.needlePos > 0 ? 'لحظة إغلاق المفتاح: ينمو الفيض المغناطيسي فينحرف المؤشر يميناً!' : 'لحظة فتح المفتاح: يتلاشى الفيض المغناطيسي فينحرف المؤشر يساراً!')
+                        : (d.closed ? 'المفتاح مغلق والتيار ثابت: لا يتغير الفيض (ΔΦ_B / Δt = 0) ⇐ المؤشر عند الصفر' : 'المفتاح مفتوح: لا ينساب تيار في الدائرة')
+                , isDark);
+            }
+
+            // 8. نشاط 3 (ف2): ظاهرة الحث الكهرومغناطيسي (الحالات الثلاث)
+            else if (act.simType === 'em_three_cases') {
+                const d = simEngine.data;
+                const cx = W * 0.44;
+                const coilTop = 185, coilH = 120, coilW = 96;
+
+                // حساب الفيض المخترق للملف الثانوي الكبير
+                let targetFlux = 0;
+                if (d.mode === 1 || d.mode === 2) {
+                    const depth = Math.max(0, Math.min(1, (d.objY - 40) / 155));
+                    targetFlux = depth;
+                } else {
+                    targetFlux = d.closed ? 1.0 : 0.0;
+                }
+
+                const prevFlux = d.fluxInCoil;
+                d.fluxInCoil += (targetFlux - d.fluxInCoil) * 0.14;
+                const dPhi = (d.fluxInCoil - prevFlux) * 26;
+
+                d.needleVel += (Math.max(-1, Math.min(1, dPhi)) - d.needlePos) * 0.25;
+                d.needleVel *= 0.75;
+                d.needlePos += d.needleVel;
+
+                // رسم الملف الثانوي الكبير الثابت في الأسفل
+                ctx.fillStyle = isDark ? '#334155' : '#cbd5e1';
+                ctx.fillRect(cx - coilW / 2 - 12, coilTop + coilH, coilW + 24, 16);
+                ctx.fillStyle = isDark ? '#1e293b' : '#e2e8f0';
+                ctx.fillRect(cx - coilW / 2, coilTop, coilW, coilH);
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 4.5;
+                for (let y = coilTop + 10; y < coilTop + coilH - 5; y += 13) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx - coilW / 2 - 4, y);
+                    ctx.lineTo(cx + coilW / 2 + 4, y);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = textMain;
+                ctx.font = 'bold 13px Cairo, sans-serif';
+                ctx.fillText('الملف الثانوي الكبير', cx, coilTop + coilH + 36);
+
+                // الكلفانوميتر على اليمين
+                const galvX = cx + 185, galvY = coilTop + 55;
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(cx + coilW / 2, coilTop + 25);
+                ctx.lineTo(galvX, coilTop + 25);
+                ctx.lineTo(galvX, galvY - 42);
+                ctx.moveTo(cx + coilW / 2, coilTop + 85);
+                ctx.lineTo(galvX, coilTop + 85);
+                ctx.lineTo(galvX, galvY + 42);
+                ctx.stroke();
+                drawGalvanometer(ctx, galvX, galvY, d.needlePos, isDark);
+
+                // رسم العنصر العلوي حسب الحالة (1 أو 2 أو 3)
+                const objW = 54, objH = 95;
+                const curY = d.mode === 3 ? 195 : d.objY;
+
+                if (d.mode === 1) {
+                    // أولاً: ساق مغناطيسية
+                    ctx.fillStyle = '#475569';
+                    ctx.fillRect(cx - objW / 2, curY, objW, objH / 2);
+                    ctx.fillStyle = '#e11d48';
+                    ctx.fillRect(cx - objW / 2, curY + objH / 2, objW, objH / 2);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 16px Courier New';
+                    ctx.fillText('S', cx, curY + 28);
+                    ctx.fillText('N', cx, curY + 76);
+                    ctx.fillStyle = textMuted;
+                    ctx.font = 'bold 12px Cairo';
+                    ctx.fillText('اسحب الساق للأعلى والأسفل', cx, curY - 10);
+                } else {
+                    // ثانياً وثالثاً: ملف ابتدائي متصل ببطارية
+                    ctx.fillStyle = '#2563eb';
+                    ctx.beginPath();
+                    ctx.roundRect(cx - objW / 2, curY, objW, objH, 8);
+                    ctx.fill();
+                    ctx.strokeStyle = '#93c5fd';
+                    ctx.lineWidth = 3;
+                    for (let y = curY + 12; y < curY + objH - 8; y += 13) {
+                        ctx.beginPath();
+                        ctx.moveTo(cx - objW / 2 - 3, y);
+                        ctx.lineTo(cx + objW / 2 + 3, y);
+                        ctx.stroke();
+                    }
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 11px Cairo';
+                    ctx.fillText('ابتدائي', cx, curY + objH / 2 + 4);
+
+                    // بطارية ومفتاح على اليسار
+                    const batX = cx - 165;
+                    ctx.strokeStyle = wireColor;
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    ctx.moveTo(cx - objW / 2, curY + 20);
+                    ctx.lineTo(batX, curY + 20);
+                    ctx.lineTo(batX, curY + 75);
+                    ctx.lineTo(cx - objW / 2, curY + 75);
+                    ctx.stroke();
+
+                    ctx.fillStyle = isDark ? '#1e293b' : '#ffffff';
+                    ctx.strokeStyle = '#0284c7';
+                    ctx.fillRect(batX - 24, curY + 32, 48, 30);
+                    ctx.strokeRect(batX - 24, curY + 32, 48, 30);
+                    ctx.fillStyle = textMain;
+                    ctx.fillText('بطارية', batX, curY + 51);
+
+                    if (d.mode === 3) {
+                        ctx.fillStyle = d.closed ? '#059669' : '#e11d48';
+                        ctx.fillText(d.closed ? 'المفتاح مغلق (انقر للفتح)' : 'المفتاح مفتوح (انقر للغلق)', batX, curY + 10);
+                    } else {
+                        ctx.fillStyle = textMuted;
+                        ctx.fillText('اسحب الملف الابتدائي للأعلى والأسفل', cx, curY - 10);
+                    }
+                }
+
+                const caseTitles = {
+                    1: 'أولاً (ساق مغناطيسية وملف): يتولد تيار محتث عند الحركة النسبية فقط',
+                    2: 'ثانياً (ملفان ابتدائي وثانوي): يتولد تيار محتث عند تقريب وإبعاد الملف الابتدائي',
+                    3: 'ثالثاً (ملفان ثابتان ومفتاح): يتذبذب المؤشر لحظتي إغلاق وفتح المفتاح فقط'
+                };
+                drawReadoutBox(ctx, W * 0.5, H - 32, caseTitles[d.mode], isDark);
+            }
+
+            // 9. نشاط 4 (ف2): تقليل التيارات الدوامة في الموصلات (البندولان)
+            else if (act.simType === 'eddy_pendulum') {
+                const d = simEngine.data;
+                d.eddyPhase += 0.15;
+
+                if (d.released) {
+                    // البندول الأيمن: صفيحة كاملة غير مقطعة -> تيارات دوامة كبيرة تكبحها سريعاً داخل المجال
+                    const inField1 = Math.abs(d.angleSolid) < 0.24;
+                    d.velSolid += -0.018 * Math.sin(d.angleSolid);
+                    d.velSolid *= inField1 ? 0.68 : 0.99;
+                    d.angleSolid += d.velSolid;
+
+                    // البندول الأيسر: صفيحة مقطعة كالمشط -> تيارات دوامة ضعيفة جداً تستمر بالاهتزاز
+                    const inField2 = Math.abs(d.angleSlotted) < 0.24;
+                    d.velSlotted += -0.018 * Math.sin(d.angleSlotted);
+                    d.velSlotted *= inField2 ? 0.988 : 0.996;
+                    d.angleSlotted += d.velSlotted;
+                }
+
+                const pivotY = 58;
+                const len = 185;
+                const x1 = W * 0.28; // الكاملة
+                const x2 = W * 0.72; // المقطعة
+
+                // عارضة الحامل العلوية
+                ctx.fillStyle = isDark ? '#334155' : '#64748b';
+                ctx.fillRect(x1 - 70, pivotY - 10, (x2 - x1) + 140, 12);
+
+                // قطبا المغناطيس الدائم القوي لكل بندول
+                [x1, x2].forEach(px => {
+                    ctx.fillStyle = 'rgba(37, 99, 235, 0.12)';
+                    ctx.strokeStyle = '#2563eb';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.roundRect(px - 48, pivotY + len - 15, 96, 85, 10);
+                    ctx.fill(); ctx.stroke();
+
+                    ctx.fillStyle = '#2563eb';
+                    ctx.font = 'bold 12px Courier New';
+                    ctx.fillText('× × × B_in', px, pivotY + len + 85);
+                });
+
+                // البندول 1: صفيحة ألمنيوم كاملة
+                const showEddy1 = d.released && Math.abs(d.angleSolid) < 0.26 && Math.abs(d.velSolid) > 0.003;
+                drawDetailedPendulum(ctx, x1, pivotY, len, d.angleSolid, false, showEddy1, d.eddyPhase, isDark);
+                ctx.fillStyle = textMain;
+                ctx.font = 'bold 13px Cairo, sans-serif';
+                ctx.fillText('1. صفيحة كاملة (غير مقطعة)', x1, 34);
+
+                // البندول 2: صفيحة مقطعة بشكل أسنان المشط
+                drawDetailedPendulum(ctx, x2, pivotY, len, d.angleSlotted, true, false, d.eddyPhase, isDark);
+                ctx.fillStyle = textMain;
+                ctx.fillText('2. صفيحة مقطعة (أسنان المشط)', x2, 34);
+
+                drawReadoutBox(ctx, W * 0.5, H - 32,
+                    !d.released
+                        ? 'اسحب الصفيحتين بالماوس أو اضغط (إفلات الصفيحتين) لمقارنة تخامد الاهتزاز!'
+                        : 'الكاملة تتوقف داخل المجال بسبب التيارات الدوامة الكبيرة، والمقطعة تستمر بالاهتزاز!'
+                , isDark);
+            }
+
+            // 10. نشاط 5أ (ف2): تأثير المحاثة للملف (المصباحان المتوازيان)
+            else if (act.simType === 'inductance_lamps') {
+                const d = simEngine.data;
+                if (d.closed) {
+                    d.iR = Math.min(1.0, d.iR + 0.18); // نمو شبه لحظي في فرع المقاومة
+                    d.iL = Math.min(1.0, d.iL + 0.012); // نمو بطيء في فرع الملف ذي القلب الحديدي
+                    if (d.curveR.length < 150) {
+                        d.curveR.push(d.iR);
+                        d.curveL.push(d.iL);
+                    }
+                }
+
+                const cx = W * 0.34, cy = H * 0.45;
+                // رسم الدائرة المتوازية
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(cx - 145, cy - 85, 290, 170);
+                ctx.beginPath();
+                ctx.moveTo(cx - 145, cy);
+                ctx.lineTo(cx + 145, cy);
+                ctx.stroke();
+
+                // الفرع العلوي: مقاومة متغيرة R + مصباح 1
+                ctx.fillStyle = '#059669';
+                ctx.fillRect(cx - 95, cy - 95, 56, 20);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 11px Cairo';
+                ctx.fillText('مقاومة R', cx - 67, cy - 81);
+                drawDetailedBulb(ctx, cx + 65, cy - 85, 'مصباح R', d.iR, isDark);
+
+                // الفرع الأوسط: ملف بقلب حديدي L + مصباح 2
+                ctx.fillStyle = '#2563eb';
+                ctx.fillRect(cx - 100, cy - 14, 66, 28);
+                ctx.strokeStyle = '#94a3b8';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(cx - 106, cy - 17);
+                ctx.lineTo(cx - 28, cy - 17);
+                ctx.stroke();
+                ctx.fillStyle = '#fff';
+                ctx.fillText('ملف L (حديد)', cx - 67, cy + 4);
+                drawDetailedBulb(ctx, cx + 65, cy, 'مصباح L', d.iL, isDark);
+
+                // الفرع السفلي: بطارية ومفتاح
+                ctx.fillStyle = textMain;
+                ctx.font = 'bold 12px Cairo';
+                ctx.fillText('بطارية', cx - 55, cy + 105);
+                ctx.fillStyle = d.closed ? '#059669' : '#e11d48';
+                ctx.fillText(d.closed ? 'المفتاح مغلق' : 'المفتاح مفتوح', cx + 55, cy + 105);
+
+                // رسم بياني لحظي للنمو الزمني على اليمين
+                const gx = W * 0.64, gy = H * 0.68, gw = W * 0.28, gh = 175;
+                ctx.strokeStyle = textMain;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(gx, gy - gh);
+                ctx.lineTo(gx, gy);
+                ctx.lineTo(gx + gw, gy);
+                ctx.stroke();
+                ctx.fillStyle = textMain;
+                ctx.fillText('منحنى نمو التيار I(t)', gx + gw / 2, gy - gh - 14);
+
+                // منحنى المقاومة (أخضر)
+                drawCurve(ctx, gx, gy, gw, gh, d.curveR, '#059669');
+                // منحنى الملف (أزرق)
+                drawCurve(ctx, gx, gy, gw, gh, d.curveL, '#2563eb');
+
+                ctx.font = 'bold 11px Cairo';
+                ctx.fillStyle = '#059669';
+                ctx.fillText('— تيار المقاومة (سريع)', gx + gw / 2, gy + 20);
+                ctx.fillStyle = '#2563eb';
+                ctx.fillText('— تيار الملف (يتأخر بسبب الحث الذاتي)', gx + gw / 2, gy + 38);
+
+                drawReadoutBox(ctx, W * 0.5, H - 30, 'يتأخر توهج مصباح الملف بسبب تولد قوة دافعة كهربائية محتثة ذاتية تعرقل نمو التيار', isDark);
+            }
+
+            // 11. نشاط 5ب (ف2): مصباح النيون 80V والحث الذاتي
+            else if (act.simType === 'neon_inductor') {
+                const d = simEngine.data;
+                if (d.closed) {
+                    d.coilCurrent = Math.min(1.0, d.coilCurrent + 0.025);
+                    d.coilVoltage = 9.0;
+                } else {
+                    d.coilCurrent = Math.max(0, d.coilCurrent - 0.18);
+                    d.coilVoltage = Math.max(0, d.coilVoltage * 0.91);
+                }
+                d.neonGlow = Math.max(0, d.neonGlow - 0.022);
+
+                const cx = W * 0.5, cy = H * 0.44;
+                // الدائرة الكهربائية
+                ctx.strokeStyle = wireColor;
+                ctx.lineWidth = 3.5;
+                ctx.strokeRect(cx - 185, cy - 85, 370, 170);
+
+                // البطارية (9V) في الأسفل
+                ctx.fillStyle = isDark ? '#0f172a' : '#f8fafc';
+                ctx.fillRect(cx - 45, cy + 70, 90, 30);
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect(cx - 18, cy + 72, 4, 26);
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(cx + 12, cy + 77, 4, 16);
+                ctx.fillStyle = textMain;
+                ctx.font = 'bold 13px Cairo';
+                ctx.fillText('بطارية (9V)', cx, cy + 115);
+
+                // المفتاح في الفرع الأيسر
+                ctx.fillStyle = isDark ? '#0f172a' : '#f8fafc';
+                ctx.fillRect(cx - 195, cy - 28, 20, 56);
+                ctx.strokeStyle = d.closed ? '#059669' : '#e11d48';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(cx - 185, cy + 25);
+                if (d.closed) ctx.lineTo(cx - 185, cy - 25);
+                else ctx.lineTo(cx - 212, cy - 18);
+                ctx.stroke();
+                ctx.fillStyle = d.closed ? '#059669' : '#e11d48';
+                ctx.fillText(d.closed ? 'مغلق' : 'مفتوح', cx - 228, cy + 5);
+
+                // الملف ذو القلب الحديدي في الوسط
+                ctx.fillStyle = '#2563eb';
+                ctx.beginPath();
+                ctx.roundRect(cx - 55, cy - 105, 110, 40, 8);
+                ctx.fill();
+                ctx.strokeStyle = '#94a3b8';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(cx - 65, cy - 112);
+                ctx.lineTo(cx + 65, cy - 112);
+                ctx.stroke();
+                ctx.fillStyle = '#fff';
+                ctx.fillText('ملف بقلب حديدي', cx, cy - 80);
+
+                // مصباح النيون (يحتاج 80V) مربوط على التوازي مع الملف في الفرع الأيمن
+                const neonX = cx + 185, neonY = cy;
+                if (d.neonGlow > 0.05) {
+                    const grad = ctx.createRadialGradient(neonX, neonY, 4, neonX, neonY, 55);
+                    grad.addColorStop(0, `rgba(255, 140, 0, ${d.neonGlow})`);
+                    grad.addColorStop(0.5, `rgba(249, 115, 22, ${d.neonGlow * 0.6})`);
+                    grad.addColorStop(1, 'rgba(249, 115, 22, 0)');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(neonX, neonY, 55, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.fillStyle = d.neonGlow > 0.15 ? '#fb923c' : (isDark ? '#334155' : '#e2e8f0');
+                ctx.strokeStyle = d.neonGlow > 0.15 ? '#ea580c' : '#64748b';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(neonX, neonY, 24, 0, Math.PI * 2);
+                ctx.fill(); ctx.stroke();
+
+                ctx.fillStyle = textMain;
+                ctx.fillText('مصباح نيون', neonX + 62, neonY - 6);
+                ctx.fillStyle = '#d97706';
+                ctx.fillText('(يحتاج 80V)', neonX + 62, neonY + 14);
+
+                // مؤشر الفولطية اللحظية على طرفي الملف
+                ctx.fillStyle = d.coilVoltage >= 80 ? '#ea580c' : '#2563eb';
+                ctx.font = 'bold 14px Courier New, monospace';
+                ctx.fillText(`V_coil = ${Math.round(d.coilVoltage)} V`, cx, cy - 35);
+
+                drawReadoutBox(ctx, cx, H - 32,
+                    d.neonGlow > 0.15
+                        ? 'توهج مصباح النيون بضوء ساطع! التلاشي السريع للتيار ولّد قوة دافعة ذاتية كبيرة (> 80V)'
+                        : (d.closed
+                            ? 'المفتاح مغلق: الفولطية 9V غير كافية لتوهج النيون (80V) — افتح المفتاح الآن!'
+                            : 'اضغط (1. إغلاق المفتاح) لشحن الملف بالتيار، ثم (2. فتح المفتاح فجأة) لمشاهدة الوميض')
+                , isDark);
+            }
             };
 
             canvas.onpointerup = () => {
@@ -2622,6 +3355,135 @@
 
             ctx.fillStyle = isDark ? '#93c5fd' : '#1e3a8a';
             ctx.fillText(text, cx, y + 4);
+        }
+
+        function drawArrowHead(ctx, x, y, angle, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(8, 0);
+            ctx.lineTo(-6, -5);
+            ctx.lineTo(-6, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawGalvanometer(ctx, x, y, needlePos, isDark) {
+            ctx.fillStyle = isDark ? '#1e293b' : '#ffffff';
+            ctx.strokeStyle = '#059669';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y, 40, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+
+            // تدريجات الكلفانوميتر وصفره في الوسط
+            ctx.strokeStyle = isDark ? '#64748b' : '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(x, y + 8, 26, -Math.PI * 0.8, -Math.PI * 0.2);
+            ctx.stroke();
+
+            ctx.fillStyle = isDark ? '#cbd5e1' : '#334155';
+            ctx.font = 'bold 11px Courier New';
+            ctx.fillText('0', x, y - 22);
+            ctx.fillText('-', x - 24, y - 10);
+            ctx.fillText('+', x + 24, y - 10);
+
+            // المؤشر المتحرك
+            const ang = needlePos * 0.85;
+            ctx.save();
+            ctx.translate(x, y + 12);
+            ctx.rotate(ang);
+            ctx.strokeStyle = '#e11d48';
+            ctx.lineWidth = 2.8;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -32);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.fillStyle = '#059669';
+            ctx.font = 'bold 12px Cairo';
+            ctx.fillText('G', x, y + 28);
+        }
+
+        function drawDetailedPendulum(ctx, px, py, len, angle, isSlotted, showEddy, eddyPhase, isDark) {
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(angle);
+            ctx.strokeStyle = isDark ? '#94a3b8' : '#475569';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, len);
+            ctx.stroke();
+
+            if (!isSlotted) {
+                ctx.fillStyle = '#94a3b8';
+                ctx.strokeStyle = '#475569';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(-26, len, 52, 58, 6);
+                ctx.fill(); ctx.stroke();
+
+                // رسم دوائر التيارات الدوامة داخل الصفيحة الكاملة عند دخولها المجال
+                if (showEddy) {
+                    ctx.strokeStyle = '#e11d48';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(0, len + 29, 15 + Math.sin(eddyPhase) * 2, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.fillStyle = '#e11d48';
+                    ctx.font = 'bold 10px Cairo';
+                    ctx.fillText('تيارات دوامة', 0, len + 72);
+                }
+            } else {
+                ctx.fillStyle = '#059669';
+                ctx.fillRect(-26, len, 52, 11);
+                for (let i = -26; i <= 18; i += 11) {
+                    ctx.fillRect(i, len + 11, 7, 47);
+                }
+            }
+            ctx.restore();
+        }
+
+        function drawDetailedBulb(ctx, x, y, label, brightness, isDark) {
+            if (brightness > 0.08) {
+                const grad = ctx.createRadialGradient(x, y, 2, x, y, 36 * brightness);
+                grad.addColorStop(0, `rgba(250, 204, 21, ${brightness})`);
+                grad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(x, y, 36, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.fillStyle = brightness > 0.15 ? `rgba(250, 204, 21, ${0.35 + brightness * 0.65})` : (isDark ? '#334155' : '#cbd5e1');
+            ctx.strokeStyle = brightness > 0.5 ? '#ca8a04' : '#64748b';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(x, y, 18, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = isDark ? '#e2e8f0' : '#1e293b';
+            ctx.font = 'bold 12px Cairo, sans-serif';
+            ctx.fillText(label, x, y + 34);
+        }
+
+        function drawCurve(ctx, gx, gy, gw, gh, dataArr, color) {
+            if (!dataArr || dataArr.length < 2) return;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            dataArr.forEach((val, idx) => {
+                const x = gx + (idx / 150) * gw;
+                const y = gy - val * (gh * 0.85);
+                if (idx === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
         }
     </script>
 </body>
